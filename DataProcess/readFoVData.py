@@ -68,13 +68,17 @@ class ReadFoVData:
             frameTileData = userDetail[2][frameNum]
 
             for tile in frameTileData:
-                row = self.getRowNumber(tile)
-                col = self.getColNumber(tile)
+                row = self.getRowNumber(int(tile))
+                col = int(self.getColNumber(int(tile)))
+
                 if isinstance(row, int):
                     videoFrame[row][col] += 1
                 else:
-                    videoFrame[row - 0.5][col] += 1
-                    videoFrame[row + 0.5][col] += 1
+                    row1 = int(row - 0.5)
+                    row2 = int(row + 0.5)
+                    videoFrame[row1][col] += 1
+                    videoFrame[row2][col] += 1
+            print("ok")
         print("ok")
         return videoFrame
 
