@@ -2,14 +2,17 @@ from DataProcess import encodeData as encData
 from DataProcess import readData as rdData
 from DataProcess import processData as procData
 from DataProcess import readFoVData as rdFoVData
+from DataProcess import getFileSizes as gtFileVSize
+import numpy as np
 
-# ==========================================================
-# main implemenataion starts================================
+# ====================================================================================================================
+# main implemenataion starts==========================================================================================
 videoSalList = ['coaster_saliency_n', 'coaster2_saliency_n', 'diving_saliency_n', 'drive_saliency_n', 'game_saliency_n',
                 'landscape_saliency_n', 'pacman_saliency_n', 'panel_saliency_n', 'ride_saliency_n', 'sport_saliency_n']
 
-videoNormList = ['ChariotRace', 'DrivingWith_4K', 'HogRider', 'KangarooIsland', 'MegaCoster', 'PacMan', 'PerlisPanel',
+videoNormList = ['ChariotRace', 'DrivingWith', 'HogRider', 'KangarooIsland', 'MegaCoster', 'PacMan', 'PerlisPanel',
                  'RollerCoster', 'SFRSport', 'SharkShipWreck']
+
 # 360p: 426x240 => 426/5 x 240/4
 # 480p: 854x480
 # 720p: 1280x720
@@ -31,59 +34,65 @@ encodeResUltraHigh = {"3": "384x270",
                       "2": "768x540",
                       "1": "1536x1080"}
 
-resolution = {"1": "8K",
+resolution = {"1": "HD",
               "2": "4K",
-              "3": "HD"}
+              "3": "8K"}
 
 encoderResList = [encodeResLow, encodeResMid, encodeResHigh, encodeResUltraHigh]
+qualityTuple = ("3", "2", "1")
 ALGORITHM_1 = 1
 
-# ==========================================================
+# ====================================================================================================================
 # [raw,col] is the index of a given tile
-
-tileTuple = ([0, 0], [0, 1], [0, 2], [0, 3], [0, 4],
-             [1, 0], [1, 1], [1, 2], [1, 3], [1, 4],
-             [2, 0], [2, 1], [2, 2], [2, 3], [2, 4],
-             [3, 0], [3, 1], [3, 2], [3, 3], [3, 4],)
+# tileTuple = ([0, 0], [0, 1], [0, 2], [0, 3], [0, 4],
+#              [1, 0], [1, 1], [1, 2], [1, 3], [1, 4],
+#              [2, 0], [2, 1], [2, 2], [2, 3], [2, 4],
+#              [3, 0], [3, 1], [3, 2], [3, 3], [3, 4],)
 
 # quality ratings
-encRateTuple = (480, 720, 1080)
+# encRateTuple = (480, 720, 1080)
+# ====================================================================================================================
+
 
 NUM_OF_COL = 5
 NUM_OF_ROW = 4
-# ==========================================================
 
+# whether to read all the frames or specific video
+isAll = False
+videoIdSal = 3
+videoIdNor = 1
+# ====================================================================================================================
 # slice the corresponding video to 1s equal size video segments
 # preProcee = PreProcessData(videoSalList)
 preProcessData = encData.EncodeData(videoSalList, videoNormList, 1, 30, NUM_OF_ROW, NUM_OF_COL)
 ##preProcessData.splitVideoSaliency(3)
 ##preProcessData.splitToTiles(1, 3840, 2160, 2,resolution)
+# ====end of prepocessing data=========================================================================================
 
-# whether to read all the frames or specific video
-isAll = False
-videoId = 3
 
-# ==========================================================
+# ====================================================================================================================
 # Start reading the frame
-##readFrame = rdData.ReadData(videoSalList,isAll,videoId)
+readFrame = rdData.ReadData(videoSalList, isAll, videoIdSal)
 ##readFrame.readSalData()
 # readFrame.readOrgData()
-# ========================================================
+
 # read the data related to the frames
 ##widthOfFrame = readFrame.width
 ##hieghtOfFrame = readFrame.height
 # reference to the extracted data
 ##frameList = readFrame.frameList
-# =========================================================
-# =========================================================
 
+# ======End of reading frame data=====================================================================================
+
+
+# ====================================================================================================================
 # processing the data using a naive algorithm. More details are in the class
 # implementation
 ##qualityList = []
-# processFrames = procData.ProcessData(frameList,tileTuple,widthOfFrame,hieghtOfFrame,encRateTuple,qualityList,NUM_OF_ROW,NUM_OF_COL)
+##processFrames = procData.ProcessData(frameList,tileTuple,widthOfFrame,hieghtOfFrame,encRateTuple,qualityList,NUM_OF_ROW,NUM_OF_COL)
 ##processFrames.thresholdImage();
 ##qualityList = processFrames.qualityList
-# =============================================================================
+
 # try:
 #     f= open("bitRateList.txt","w+")
 #     for i in range(len(qualityList)):
@@ -94,8 +103,10 @@ videoId = 3
 # except:
 #     print("file not opened")
 #
-# =============================================================================
+# ======End of processing data=========================================================================================
 
+
+# ======================================================================================================================
 # Open the file with read only permit
 f = open('naiveBinaryThresh.txt')
 # use readline() to read the first line
@@ -125,18 +136,25 @@ while line:
     tempList.clear()
     line = f.readline()
 # for i in range(len(encoderResList)):
-    # if (i == 3):
-        # preProcessData.storeData(1, bitRateList, ALGORITHM_1, encoderResList, i)
+# if (i == 3):
+# preProcessData.storeData(1, bitRateList, ALGORITHM_1, encoderResList, i)
 f.close()
 
-#read the FoV data and process the tiles  for each frame
+# read the FoV data and process the tiles  for each frame
 fovReader = rdFoVData.ReadFoVData()
 fovReader.readExcelFiles()
-fovReader.processOneUserTrial(0)
+aveAllUserFoVTraceNpArray = fovReader.processTheTrace()
 
+# =====End of reading FoV traces and get average value for whole the video using all the users=========================
 
+# =====================================================================================================================
+# This set of codes read the file sizes of the video using the avarage FoV traces of the users. We assume that data
+# transmission and the client end process do not have any issues in processing. In the mean time we try to read the
+# file sizes related to Rubiks as well
 
-# =========================================================
-# =========================================================
-# main implementation ends=================================
-
+fileSizeReader = gtFileVSize.GetFileSizes(aveAllUserFoVTraceNpArray, NUM_OF_ROW, NUM_OF_COL)
+# for i in range(qualityTuple.__len__()):
+#     fileSizeReader.readFileSizeOurImp(qualityTuple[i], videoIdNor, videoNormList, ALGORITHM_1)
+fileSizeReader.readRubiksFileSize(videoIdNor, videoNormList)
+# ====================================================================================================================
+# ==== main implementation ends=======================================================================================

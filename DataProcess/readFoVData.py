@@ -4,8 +4,9 @@ import numpy as np
 
 class ReadFoVData:
     strxlsxNameList = []
-    userDetail = []
+    allUserDetail = []
     numOfViewer = 50
+    aveAllTileInChunk = False
 
     rowMapping = [0, 0, 0.5, 1, 1, 2, 2, 2.5, 3, 3]
 
@@ -39,9 +40,22 @@ class ReadFoVData:
                         tileNumbers.append(row[1:])
                     rowCount += 1
                 tempUserdetail = [rowCount - 1, frameNumber, tileNumbers]
-            self.userDetail.append(tempUserdetail)
-        print("ok")
+            self.allUserDetail.append(tempUserdetail)
         return
+
+    def processTheTrace(self):
+
+        allUserFoVTrace = []
+        for i in range(self.numOfViewer):
+            allUserFoVTrace.append(self.processOneUserTrial(i))
+
+        allUserFoVTracenpArray = np.asarray(allUserFoVTrace)
+        aveAllUserFoVTracenpArray = np.mean(allUserFoVTracenpArray, axis=0)
+        # print(aveAllUserFoVTracenpArray.shape)
+
+        self.maskArray(aveAllUserFoVTracenpArray)
+
+        return aveAllUserFoVTracenpArray
 
     # function to process the data. Basically this function get one user frame and return each of the tile
     # map according our 4x5 implmentation
@@ -49,19 +63,32 @@ class ReadFoVData:
     def processOneUserTrial(self, userID):
 
         # list containing one user related data
-        userDetail = self.userDetail[userID]
+        singleUserFoVTrace = []
+        userDetail = self.allUserDetail[userID]
         numOfFrames = userDetail[0]
         fps = numOfFrames // 60
         for sec in range(0, numOfFrames, fps):
-            self.getOneSecTile(sec, fps, userDetail)
+            singleUserFoVTrace.append(self.getOneSecTile(sec, fps, userDetail))
 
-        return
+        # compute the average fov tile in bins per user. Here the bins mean 4 x 5 tile segementaion for the frame
+        # aveSingleUserFoVTrace = sum(singleUserFoVTrace)//len(singleUserFoVTrace)
+
+        return singleUserFoVTrace
 
     # function to get the tile distribution for 1s of the chunk
     def getOneSecTile(self, sec, fps, userDetail):
 
         videoFrame = np.zeros((4, 5))
-        for i in range(fps):
+
+        # If we consider only the first frame of 30 frames in a chunk for saliency detection, we have to
+        # consider only the fov data of first frame of the same chunk. This if condition define the number
+        # of frames to be consider in the chunk
+        if self.aveAllTileInChunk:
+            numOfTileChunk = fps
+        else:
+            numOfTileChunk = 1
+
+        for i in range(numOfTileChunk):
             frameNum = sec + i
 
             # lsit containing the tile details for a given frame
@@ -78,12 +105,12 @@ class ReadFoVData:
                     row2 = int(row + 0.5)
                     videoFrame[row1][col] += 1
                     videoFrame[row2][col] += 1
-            print("ok")
-        print("ok")
+
         return videoFrame
 
     # return the 4 x 5 row number for given tile
     def getRowNumber(self, tile):
+
         tile -= 1
         tempRowVal = tile // 20
         rowVal = self.rowMapping[tempRowVal]
@@ -98,3 +125,23 @@ class ReadFoVData:
         colVal = tempColVal // 4
 
         return colVal
+
+    # this function select the maximum 4 indices from the array and creat a mask as 1 and
+    # others are zero
+    def maskArray(self, avgFoVArray):
+
+        numOfFrames = avgFoVArray.shape[0]
+
+        for i in range(numOfFrames):
+            tempArray = avgFoVArray[i].flatten()
+            maxInd = (-tempArray).argsort()[:4]
+            minInd = tempArray.argsort()[:16]
+
+            tempArray[maxInd] = 1;
+            tempArray[minInd] = 0
+            if i == 2:
+                print("stop")
+            tempArray = np.reshape(tempArray, [4, 5])
+            avgFoVArray[i] = tempArray
+
+        return
