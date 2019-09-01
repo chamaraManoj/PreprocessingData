@@ -153,8 +153,8 @@ aveAllUserFoVTraceNpArray = fovReader.processTheTrace()
 # file sizes related to Rubiks as well
 
 fileSizeReader = gtFileVSize.GetFileSizes(aveAllUserFoVTraceNpArray, NUM_OF_ROW, NUM_OF_COL)
-# for i in range(qualityTuple.__len__()):
-#     fileSizeReader.readFileSizeOurImp(qualityTuple[i], videoIdNor, videoNormList, ALGORITHM_1)
+for i in range(qualityTuple.__len__()):
+      fileSizeReader.readFileSizeOurImp(qualityTuple[i], videoIdNor, videoNormList, ALGORITHM_1)
 fileSizeReader.readRubiksFileSize(videoIdNor, videoNormList)
 # ====================================================================================================================
 # ==== main implementation ends=======================================================================================
