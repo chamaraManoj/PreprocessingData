@@ -154,7 +154,8 @@ aveAllUserFoVTraceNpArray = fovReader.processTheTrace()
 
 fileSizeReader = gtFileVSize.GetFileSizes(aveAllUserFoVTraceNpArray, NUM_OF_ROW, NUM_OF_COL)
 for i in range(qualityTuple.__len__()):
-      fileSizeReader.readFileSizeOurImp(qualityTuple[i], videoIdNor, videoNormList, ALGORITHM_1)
-fileSizeReader.readRubiksFileSize(videoIdNor, videoNormList)
+    if i == 1:
+        fileSizeReader.readFileSizeOurImp(qualityTuple[i], videoIdNor, videoNormList, ALGORITHM_1)
+# fileSizeReader.readRubiksFileSize(videoIdNor, videoNormList)
 # ====================================================================================================================
 # ==== main implementation ends=======================================================================================
