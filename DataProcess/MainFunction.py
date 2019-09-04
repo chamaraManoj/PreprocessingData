@@ -3,6 +3,7 @@ from DataProcess import readData as rdData
 from DataProcess import processData as procData
 from DataProcess import readFoVData as rdFoVData
 from DataProcess import getFileSizes as gtFileVSize
+from DataProcess import differentImageProcessingFunctinos as difImageProceFunc
 import numpy as np
 
 # ====================================================================================================================
@@ -12,8 +13,6 @@ videoSalList = ['coaster_saliency_n', 'coaster2_saliency_n', 'diving_saliency_n'
 
 videoNormList = ['ChariotRace', 'DrivingWith', 'HogRider', 'KangarooIsland', 'MegaCoster', 'PacMan', 'PerlisPanel',
                  'RollerCoster', 'SFRSport', 'SharkShipWreck']
-
-layerMechanismVideoType = ["Rubiks", "ProcessedVideo_algo_1_Q2_4layers"]
 
 # 360p: 426x240 => 426/5 x 240/4
 # 480p: 854x480
@@ -74,16 +73,21 @@ preProcessData = encData.EncodeData(videoSalList, videoNormList, 1, 30, NUM_OF_R
 
 # ====================================================================================================================
 # Start reading the frame
-readFrame = rdData.ReadData(videoSalList,videoNormList, isAll, videoIdSal)
+readFrame = rdData.ReadData(videoSalList, videoNormList, isAll, videoIdSal)
 readFrame.readSalData()
-#readFrame.readOrgData()
+readFrame.readOrgData()
+frameListSal = readFrame.frameListSal
+frameListOri = readFrame.frameListOrg
+
+imProceeFuncs = difImageProceFunc.ImageProcessingFunc()
+imProceeFuncs.getSalientRegion(frameListSal,frameListOri)
+
 
 # read the data related to the frames
-widthOfFrame = readFrame.width
-hieghtOfFrame = readFrame.height
+##widthOfFrame = readFrame.width
+##hieghtOfFrame = readFrame.height
 # reference to the extracted data
-frameListSal = readFrame.frameListSal
-
+##frameList = readFrame.frameList
 
 # ======End of reading frame data=====================================================================================
 
@@ -157,7 +161,8 @@ aveAllUserFoVTraceNpArray = fovReader.processTheTrace()
 
 fileSizeReader = gtFileVSize.GetFileSizes(aveAllUserFoVTraceNpArray, NUM_OF_ROW, NUM_OF_COL)
 # for i in range(qualityTuple.__len__()):
-#     fileSizeReader.readFileSizeOurImp(qualityTuple[i], videoIdNor, videoNormList, ALGORITHM_1)
-# fileSizeReader.readRubiksFileSize(videoIdNor, videoNormList, layerMechanismVideoType[1])
+#     if i == 1:
+#         fileSizeReader.readFileSizeOurImp(qualityTuple[i], videoIdNor, videoNormList, ALGORITHM_1)
+# fileSizeReader.readRubiksFileSize(videoIdNor, videoNormList)
 # ====================================================================================================================
 # ==== main implementation ends=======================================================================================

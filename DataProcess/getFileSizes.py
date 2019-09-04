@@ -8,7 +8,7 @@ import re
 
 class GetFileSizes:
     frameCateogry = ("MuxedFrames", "DemuxedFrames", "DemuxedFramesWithout_I_Frames")
-    fovPlus = ("FoV_only", "FoV_plus")
+    fovPlus = ("FoV_only", "FoV_All")
 
     def __init__(self, fovTrces, numOfRow, numOfCol):
         self.fovTraces = fovTrces
@@ -23,7 +23,7 @@ class GetFileSizes:
         # this function read the file sizes based on our implmentation. It reads the file sizes based on users FoV pattern
         # For each second of chunk, file size is stored
 
-        filePath = r"E:\Dataset\FinalProcessedVideo" + "\\" + "ProcessedVideo_algo_1_Q" + str(qualityLevl) + "\\" + \
+        filePath = r"H:\Dataset\FinalProcessedVideo" + "\\" + "ProcessedVideo_algo_1_Q" + str(qualityLevl) + "\\" + \
                    videoList[videoId] + "\\" + "frame_"
         allFramesAllFileSize = []
         allFramesChunkFileSize = []
@@ -43,8 +43,10 @@ class GetFileSizes:
             rowIndi = tileIndices[0]
             colIndi = tileIndices[1]
 
-            addRowIndi, addColIndi = self.getAdditionalcol(rowIndi, colIndi)
-
+            #read the total number of tile including additional tiles as well.
+            addRowIndi, addColIndi, foVTiles = self.getAdditionalcol(rowIndi, colIndi)
+            # addRowIndi = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]
+            # addColIndi = [0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 0, 1, 2, 3, 4]
             chunknumber = '{:03d}'.format(i)
             singleFrameFileSize = []
             singleFrameDemuxFileSize = []
@@ -75,14 +77,14 @@ class GetFileSizes:
             allFramesChunkDemuxFileSize.append(tempSum)
 
             # normal muxed type video file size readingFoVPlus
-            allFramesChunkFileSizeFOVPlus.append(sum(singleFrameFileSize))
-            allFramesAllFileSizeFOVPlus.append(singleFrameFileSize)
+            allFramesChunkFileSizeFOVPlus.append(sum(singleFrameFileSizeFoVPlus))
+            allFramesAllFileSizeFOVPlus.append(singleFrameFileSizeFoVPlus)
 
             # Demuxed video file size reading
-            allFramesAllDemuxFileSizeFOVPlus.append(singleFrameDemuxFileSize)
+            allFramesAllDemuxFileSizeFOVPlus.append(singleFrameDemuxFileSizeFoVPlus)
             tempSum = 0
-            for l in range(len(singleFrameDemuxFileSize)):
-                tempSum += sum(singleFrameDemuxFileSize[l])
+            for l in range(len(singleFrameDemuxFileSizeFoVPlus)):
+                tempSum += sum(singleFrameDemuxFileSizeFoVPlus[l])
             allFramesChunkDemuxFileSizeFOVPlus.append(tempSum)
 
         self.writeDataNewMethod(allFramesAllFileSize, allFramesChunkFileSize, qualityLevl, videoId, videoList, algo,
@@ -99,9 +101,9 @@ class GetFileSizes:
         return
 
     # This function read the video sizes related to the Rubiks implementation
-    def readRubiksFileSize(self, videoId, videoList, videoFile):
+    def readRubiksFileSize(self, videoId, videoList):
 
-        filePath = r"E:\Dataset\FinalProcessedVideo" + "\\" + videoFile + "\\" + \
+        filePath = r"H:\Dataset\FinalProcessedVideo" + "\\" + "Rubiks" + "\\" + \
                    videoList[videoId] + "\\" + "frame_"
         allFramesAllFileSize = []
         allFramesChunkFileSize = []
@@ -160,11 +162,11 @@ class GetFileSizes:
             allFramesChunkDemuxFileSizeWithoutIFrames.append(tempSum)
 
         self.writeDataRubiksMethod(allFramesAllFileSize, allFramesChunkFileSize, videoId, videoList,
-                                   self.frameCateogry[0], videoFile)
+                                   self.frameCateogry[0])
         self.writeDataRubiksMethod(allFramesAllDemuxFileSize, allFramesChunkDemuxFileSize, videoId, videoList,
-                                   self.frameCateogry[1], videoFile)
+                                   self.frameCateogry[1])
         self.writeDataRubiksMethod(allFramesAllDemuxFileSizeWithoutIFrames, allFramesChunkDemuxFileSizeWithoutIFrames,
-                                   videoId, videoList, self.frameCateogry[2], videoFile)
+                                   videoId, videoList, self.frameCateogry[2], )
 
         return
 
@@ -191,7 +193,7 @@ class GetFileSizes:
                            fovPlus,
                            frameCategory):
 
-        filePath = "E:\Dataset\FileSizeStat" + "\\" + "FileSize_algo_" + str(algo) + "_" + "Q" + str(
+        filePath = "H:\Dataset\FileSizeStat" + "\\" + "FileSize_algo_" + str(algo) + "_" + "Q" + str(
             qualityLevl) + "_" + str(fovPlus) + "\\" + videoList[videoId] + "\\" + str(frameCategory)
 
         if not os.path.exists(filePath):
@@ -217,9 +219,8 @@ class GetFileSizes:
         return
 
     # function override to write the data related to Rubiks Video
-    def writeDataRubiksMethod(self, allFramesAllFileSize, allFramesChunkFileSize, videoId, videoList, frameCategory,
-                              videoFile):
-        filePath = "E:\Dataset\FileSizeStat" + "\\" + "FileSize_algo_" + videoFile + "_" + "\\" + videoList[
+    def writeDataRubiksMethod(self, allFramesAllFileSize, allFramesChunkFileSize, videoId, videoList, frameCategory):
+        filePath = "H:\Dataset\FileSizeStat" + "\\" + "FileSize_algo_" + "Rubiks" + "_" + "\\" + videoList[
             videoId] + "\\" + str(frameCategory)
 
         if not os.path.exists(filePath):
@@ -282,10 +283,11 @@ class GetFileSizes:
                     if not tempCord in fovTiles:
                         fovTiles.append(tempCord)
 
+
         totRowIndi = []
         totColIndi = []
         for i in range(len(fovTiles)):
             totRowIndi.append(fovTiles[i][0])
             totColIndi.append(fovTiles[i][1])
 
-        return [totRowIndi, totColIndi]
+        return [totRowIndi, totColIndi, fovTiles]
