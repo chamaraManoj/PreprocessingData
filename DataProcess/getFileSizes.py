@@ -43,9 +43,10 @@ class GetFileSizes:
             rowIndi = tileIndices[0]
             colIndi = tileIndices[1]
 
-            addRowIndi, addColIndi = self.getAdditionalcol(rowIndi, colIndi)
-            addRowIndi = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]
-            addColIndi = [0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 0, 1, 2, 3, 4]
+            #read the total number of tile including additional tiles as well.
+            addRowIndi, addColIndi, foVTiles = self.getAdditionalcol(rowIndi, colIndi)
+            # addRowIndi = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]
+            # addColIndi = [0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 0, 1, 2, 3, 4]
             chunknumber = '{:03d}'.format(i)
             singleFrameFileSize = []
             singleFrameDemuxFileSize = []
@@ -55,8 +56,8 @@ class GetFileSizes:
             for j in range(len(rowIndi)):
                 tempfilePath = filePath + str(rowIndi[j]) + "_" + str(colIndi[j]) + "\\" + "frame_" + str(
                     chunknumber) + ".mp4"
-                # singleFrameFileSize.append(os.path.getsize(tempfilePath))
-                # singleFrameDemuxFileSize.append(self.readFramesSize(tempfilePath))
+                singleFrameFileSize.append(os.path.getsize(tempfilePath))
+                singleFrameDemuxFileSize.append(self.readFramesSize(tempfilePath))
 
             for j in range(len(addRowIndi)):
                 tempfilePath = filePath + str(addRowIndi[j]) + "_" + str(addColIndi[j]) + "\\" + "frame_" + str(
@@ -86,11 +87,11 @@ class GetFileSizes:
                 tempSum += sum(singleFrameDemuxFileSizeFoVPlus[l])
             allFramesChunkDemuxFileSizeFOVPlus.append(tempSum)
 
-        # self.writeDataNewMethod(allFramesAllFileSize, allFramesChunkFileSize, qualityLevl, videoId, videoList, algo,
-        #                         self.fovPlus[0], self.frameCateogry[0])
-        # self.writeDataNewMethod(allFramesAllDemuxFileSize, allFramesChunkDemuxFileSize, qualityLevl, videoId, videoList,
-        #                         algo,
-        #                         self.fovPlus[0], self.frameCateogry[1])
+        self.writeDataNewMethod(allFramesAllFileSize, allFramesChunkFileSize, qualityLevl, videoId, videoList, algo,
+                                self.fovPlus[0], self.frameCateogry[0])
+        self.writeDataNewMethod(allFramesAllDemuxFileSize, allFramesChunkDemuxFileSize, qualityLevl, videoId, videoList,
+                                algo,
+                                self.fovPlus[0], self.frameCateogry[1])
 
         self.writeDataNewMethod(allFramesAllFileSizeFOVPlus, allFramesChunkFileSizeFOVPlus, qualityLevl, videoId,
                                 videoList, algo, self.fovPlus[1], self.frameCateogry[0])
@@ -282,10 +283,11 @@ class GetFileSizes:
                     if not tempCord in fovTiles:
                         fovTiles.append(tempCord)
 
+
         totRowIndi = []
         totColIndi = []
         for i in range(len(fovTiles)):
             totRowIndi.append(fovTiles[i][0])
             totColIndi.append(fovTiles[i][1])
 
-        return [totRowIndi, totColIndi]
+        return [totRowIndi, totColIndi, fovTiles]

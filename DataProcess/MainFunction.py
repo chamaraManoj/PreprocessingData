@@ -3,6 +3,7 @@ from DataProcess import readData as rdData
 from DataProcess import processData as procData
 from DataProcess import readFoVData as rdFoVData
 from DataProcess import getFileSizes as gtFileVSize
+from DataProcess import differentImageProcessingFunctinos as difImageProceFunc
 import numpy as np
 
 # ====================================================================================================================
@@ -72,9 +73,15 @@ preProcessData = encData.EncodeData(videoSalList, videoNormList, 1, 30, NUM_OF_R
 
 # ====================================================================================================================
 # Start reading the frame
-readFrame = rdData.ReadData(videoSalList, isAll, videoIdSal)
-##readFrame.readSalData()
-# readFrame.readOrgData()
+readFrame = rdData.ReadData(videoSalList, videoNormList, isAll, videoIdSal)
+readFrame.readSalData()
+readFrame.readOrgData()
+frameListSal = readFrame.frameListSal
+frameListOri = readFrame.frameListOrg
+
+imProceeFuncs = difImageProceFunc.ImageProcessingFunc()
+imProceeFuncs.getSalientRegion(frameListSal,frameListOri)
+
 
 # read the data related to the frames
 ##widthOfFrame = readFrame.width
@@ -153,9 +160,9 @@ aveAllUserFoVTraceNpArray = fovReader.processTheTrace()
 # file sizes related to Rubiks as well
 
 fileSizeReader = gtFileVSize.GetFileSizes(aveAllUserFoVTraceNpArray, NUM_OF_ROW, NUM_OF_COL)
-for i in range(qualityTuple.__len__()):
-    if i == 1:
-        fileSizeReader.readFileSizeOurImp(qualityTuple[i], videoIdNor, videoNormList, ALGORITHM_1)
+# for i in range(qualityTuple.__len__()):
+#     if i == 1:
+#         fileSizeReader.readFileSizeOurImp(qualityTuple[i], videoIdNor, videoNormList, ALGORITHM_1)
 # fileSizeReader.readRubiksFileSize(videoIdNor, videoNormList)
 # ====================================================================================================================
 # ==== main implementation ends=======================================================================================
