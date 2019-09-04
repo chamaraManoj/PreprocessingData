@@ -99,9 +99,9 @@ class GetFileSizes:
         return
 
     # This function read the video sizes related to the Rubiks implementation
-    def readRubiksFileSize(self, videoId, videoList):
+    def readRubiksFileSize(self, videoId, videoList, videoFile):
 
-        filePath = r"E:\Dataset\FinalProcessedVideo" + "\\" + "Rubiks" + "\\" + \
+        filePath = r"E:\Dataset\FinalProcessedVideo" + "\\" + videoFile + "\\" + \
                    videoList[videoId] + "\\" + "frame_"
         allFramesAllFileSize = []
         allFramesChunkFileSize = []
@@ -160,11 +160,11 @@ class GetFileSizes:
             allFramesChunkDemuxFileSizeWithoutIFrames.append(tempSum)
 
         self.writeDataRubiksMethod(allFramesAllFileSize, allFramesChunkFileSize, videoId, videoList,
-                                   self.frameCateogry[0])
+                                   self.frameCateogry[0], videoFile)
         self.writeDataRubiksMethod(allFramesAllDemuxFileSize, allFramesChunkDemuxFileSize, videoId, videoList,
-                                   self.frameCateogry[1])
+                                   self.frameCateogry[1], videoFile)
         self.writeDataRubiksMethod(allFramesAllDemuxFileSizeWithoutIFrames, allFramesChunkDemuxFileSizeWithoutIFrames,
-                                   videoId, videoList, self.frameCateogry[2], )
+                                   videoId, videoList, self.frameCateogry[2], videoFile)
 
         return
 
@@ -187,11 +187,12 @@ class GetFileSizes:
         return frameSizes
 
     # this function writes the data read from the muxed video
-    def writeDataNewMethod(self, allFramesAllFileSize, allFramesChunkFileSize, qualityLevl, videoId, videoList, algo, fovPlus,
+    def writeDataNewMethod(self, allFramesAllFileSize, allFramesChunkFileSize, qualityLevl, videoId, videoList, algo,
+                           fovPlus,
                            frameCategory):
 
         filePath = "E:\Dataset\FileSizeStat" + "\\" + "FileSize_algo_" + str(algo) + "_" + "Q" + str(
-            qualityLevl) + "_" + str(fovPlus)+"\\" + videoList[videoId] + "\\" + str(frameCategory)
+            qualityLevl) + "_" + str(fovPlus) + "\\" + videoList[videoId] + "\\" + str(frameCategory)
 
         if not os.path.exists(filePath):
             os.makedirs(filePath)
@@ -216,8 +217,9 @@ class GetFileSizes:
         return
 
     # function override to write the data related to Rubiks Video
-    def writeDataRubiksMethod(self, allFramesAllFileSize, allFramesChunkFileSize, videoId, videoList, frameCategory):
-        filePath = "E:\Dataset\FileSizeStat" + "\\" + "FileSize_algo_" + "Rubiks" + "_" + "\\" + videoList[
+    def writeDataRubiksMethod(self, allFramesAllFileSize, allFramesChunkFileSize, videoId, videoList, frameCategory,
+                              videoFile):
+        filePath = "E:\Dataset\FileSizeStat" + "\\" + "FileSize_algo_" + videoFile + "_" + "\\" + videoList[
             videoId] + "\\" + str(frameCategory)
 
         if not os.path.exists(filePath):

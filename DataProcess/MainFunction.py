@@ -13,6 +13,8 @@ videoSalList = ['coaster_saliency_n', 'coaster2_saliency_n', 'diving_saliency_n'
 videoNormList = ['ChariotRace', 'DrivingWith', 'HogRider', 'KangarooIsland', 'MegaCoster', 'PacMan', 'PerlisPanel',
                  'RollerCoster', 'SFRSport', 'SharkShipWreck']
 
+layerMechanismVideoType = ["Rubiks", "ProcessedVideo_algo_1_Q2_4layers"]
+
 # 360p: 426x240 => 426/5 x 240/4
 # 480p: 854x480
 # 720p: 1280x720
@@ -72,15 +74,16 @@ preProcessData = encData.EncodeData(videoSalList, videoNormList, 1, 30, NUM_OF_R
 
 # ====================================================================================================================
 # Start reading the frame
-readFrame = rdData.ReadData(videoSalList, isAll, videoIdSal)
-##readFrame.readSalData()
-# readFrame.readOrgData()
+readFrame = rdData.ReadData(videoSalList,videoNormList, isAll, videoIdSal)
+readFrame.readSalData()
+#readFrame.readOrgData()
 
 # read the data related to the frames
-##widthOfFrame = readFrame.width
-##hieghtOfFrame = readFrame.height
+widthOfFrame = readFrame.width
+hieghtOfFrame = readFrame.height
 # reference to the extracted data
-##frameList = readFrame.frameList
+frameListSal = readFrame.frameListSal
+
 
 # ======End of reading frame data=====================================================================================
 
@@ -153,8 +156,8 @@ aveAllUserFoVTraceNpArray = fovReader.processTheTrace()
 # file sizes related to Rubiks as well
 
 fileSizeReader = gtFileVSize.GetFileSizes(aveAllUserFoVTraceNpArray, NUM_OF_ROW, NUM_OF_COL)
-for i in range(qualityTuple.__len__()):
-      fileSizeReader.readFileSizeOurImp(qualityTuple[i], videoIdNor, videoNormList, ALGORITHM_1)
-fileSizeReader.readRubiksFileSize(videoIdNor, videoNormList)
+# for i in range(qualityTuple.__len__()):
+#     fileSizeReader.readFileSizeOurImp(qualityTuple[i], videoIdNor, videoNormList, ALGORITHM_1)
+# fileSizeReader.readRubiksFileSize(videoIdNor, videoNormList, layerMechanismVideoType[1])
 # ====================================================================================================================
 # ==== main implementation ends=======================================================================================
