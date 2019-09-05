@@ -14,19 +14,22 @@ class ReadFoVData:
         return
 
     # Function to create the name list of the excel reading file
-    def getNameList(self):
+    def getNameList(self,videoName):
+        self.strxlsxNameList.clear()
+        filePath = "E:/Dataset/FoVData/"
         for i in range(self.numOfViewer):
             number = '{:02d}'.format(i + 1)
-            fileName = "drive_user" + str(number) + "_tile.csv"
-            self.strxlsxNameList.append(fileName)
+            tempFileName = filePath + videoName + str(number) + "_tile.csv"
+            self.strxlsxNameList.append(tempFileName)
         return
 
     # this function to read the data from the csv files and store them in a seperate list
     # for each user it contains: number of frames read
     # list of frame ID
     # list of tiles for each frame ID
-    def readExcelFiles(self):
-        self.getNameList()
+    def readExcelFiles(self, videoName):
+        self.allUserDetail.clear()
+        self.getNameList(videoName)
         for i in range(len(self.strxlsxNameList)):
             fileName = self.strxlsxNameList[i]
             with open(fileName, 'rt')as f:
@@ -41,7 +44,7 @@ class ReadFoVData:
                     rowCount += 1
                 tempUserdetail = [rowCount - 1, frameNumber, tileNumbers]
             self.allUserDetail.append(tempUserdetail)
-        return
+        return self.allUserDetail
 
     def processTheTrace(self):
 

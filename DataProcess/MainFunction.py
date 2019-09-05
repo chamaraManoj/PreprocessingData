@@ -6,13 +6,25 @@ from DataProcess import getFileSizes as gtFileVSize
 from DataProcess import differentImageProcessingFunctinos as difImageProceFunc
 import numpy as np
 
+
+
 # ====================================================================================================================
 # main implemenataion starts==========================================================================================
-videoSalList = ['coaster_saliency_n', 'coaster2_saliency_n', 'diving_saliency_n', 'drive_saliency_n', 'game_saliency_n',
-                'landscape_saliency_n', 'pacman_saliency_n', 'panel_saliency_n', 'ride_saliency_n', 'sport_saliency_n']
+
+
+# 'coaster2_saliency_n'  'pacman_saliency_n' is removed for the moment could not get exact 1 min
+videoSalList = ['coaster_saliency_n', 'pacman_saliency_n', 'diving_saliency_n', 'drive_saliency_n', 'game_saliency_n',
+                'landscape_saliency_n', 'panel_saliency_n', 'ride_saliency_n', 'sport_saliency_n']
 
 videoNormList = ['ChariotRace', 'DrivingWith', 'HogRider', 'KangarooIsland', 'MegaCoster', 'PacMan', 'PerlisPanel',
                  'RollerCoster', 'SFRSport', 'SharkShipWreck']
+# 'MegaCoster' 'PacMan'
+videoNormListForSaliencyAnalysis = ['RollerCoster', 'PacMan', 'SharkShipWreck', 'DrivingWith', 'HogRider',
+                                    'KangarooIsland',
+                                    'PerlisPanel', 'ChariotRace', 'SFRSport']
+
+fovUserList = ["coaster_user", "pacman_user", "diving_user", "drive_user", "game_user",
+               "landscape_user", "panel_user", "ride_user", "sport_user"]
 
 # 360p: 426x240 => 426/5 x 240/4
 # 480p: 854x480
@@ -42,6 +54,9 @@ resolution = {"1": "HD",
 encoderResList = [encodeResLow, encodeResMid, encodeResHigh, encodeResUltraHigh]
 qualityTuple = ("3", "2", "1")
 ALGORITHM_1 = 1
+
+SALIENCY_VIDEO = 0
+RGB_VIDEO = 1
 
 # ====================================================================================================================
 # [raw,col] is the index of a given tile
@@ -73,15 +88,23 @@ preProcessData = encData.EncodeData(videoSalList, videoNormList, 1, 30, NUM_OF_R
 
 # ====================================================================================================================
 # Start reading the frame
-readFrame = rdData.ReadData(videoSalList, videoNormList, isAll, videoIdSal)
-readFrame.readSalData()
-readFrame.readOrgData()
-frameListSal = readFrame.frameListSal
-frameListOri = readFrame.frameListOrg
-
+readFrame = rdData.ReadData(videoSalList, videoNormListForSaliencyAnalysis, isAll)
 imProceeFuncs = difImageProceFunc.ImageProcessingFunc()
-imProceeFuncs.getSalientRegion(frameListSal,frameListOri)
 
+# Draw saliency region on top of the video frame
+# for i in range(len(videoSalList)):
+#     print("frame")
+#     print(i)
+#     if i == 1:
+#         print(1)
+#     readFrame.readSalData(i)
+#
+#     readFrame.readOrgData(i)
+#     frameListSal = readFrame.frameListSal
+#     frameListOri = readFrame.frameListOrg
+#     frameNumList = readFrame.randomFrames
+#
+#     imProceeFuncs.getSalientRegion(frameListSal, frameListOri, frameNumList, videoNormListForSaliencyAnalysis, i)
 
 # read the data related to the frames
 ##widthOfFrame = readFrame.width
@@ -149,7 +172,13 @@ f.close()
 
 # read the FoV data and process the tiles  for each frame
 fovReader = rdFoVData.ReadFoVData()
-fovReader.readExcelFiles()
+allFoVTraces = []
+for i in range(len(fovUserList)):
+    allFoVTraces.append(fovReader.readExcelFiles(fovUserList[i]))
+
+for i in range(len(allFoVTraces)):
+    imProceeFuncs.getNormalizedSaliencyForTile(allFoVTraces[i], videoSalList[i], SALIENCY_VIDEO)
+
 aveAllUserFoVTraceNpArray = fovReader.processTheTrace()
 
 # =====End of reading FoV traces and get average value for whole the video using all the users=========================
