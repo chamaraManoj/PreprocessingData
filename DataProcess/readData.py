@@ -8,9 +8,9 @@ import random
 class ReadData:
     NUM_OF_FRAMES = 10
 
-    # salInFilePath = "E:\Dataset\ProcessedVideoSaliency"
-    salInFilePath = "E:/Dataset/RawSaliencyData"
-    normInFilePath = "E:/Dataset/RawVideoOriginal"
+    # salInFilePath = "H:\Dataset\ProcessedVideoSaliency"
+    salInFilePath = "H:/Dataset/RawSaliencyData"
+    normInFilePath = "H:/Dataset/RawVideoOriginal"
 
     frameListSal = []
     frameListOrg = []
@@ -66,7 +66,7 @@ class ReadData:
                     # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-                    # path = "E:/Uni_Studies/Useful_Datasets_360/Dataset_3_360_Video_Viewing_Dataset_in_head_mounted_virtual_reality/360dataset/intermediateResults/sal.png"
+                    # path = "H:/Uni_Studies/Useful_Datasets_360/Dataset_3_360_Video_Viewing_Dataset_in_head_mounted_virtual_reality/360dataset/intermediateResults/sal.png"
                     # cv2.imshow('',colorFrame)
 
                     # plt.figure(count + 1)
@@ -155,7 +155,7 @@ class ReadData:
                 #     end_y = int(frame.shape[0])
                 #     cv2.line(img, (start_x, start_y), (end_x, end_y), (255, 255, 255), cv2.LINE_AA, 0)
 
-                # path = "E:/Uni_Studies/Useful_Datasets_360\Dataset_3_360_Video_Viewing_Dataset_in_head_mounted_virtual_reality/360dataset/intermediateResults/ori.png"
+                # path = "H:/Uni_Studies/Useful_Datasets_360\Dataset_3_360_Video_Viewing_Dataset_in_head_mounted_virtual_reality/360dataset/intermediateResults/ori.png"
                 # cv2.imwrite(path, img)
 
                 self.frameListOrg.append(frame)
@@ -194,7 +194,7 @@ class ReadData:
             else:
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            # path = "E:/Uni_Studies/Useful_Datasets_360/Dataset_3_360_Video_Viewing_Dataset_in_head_mounted_virtual_reality/360dataset/intermediateResults/sal.png"
+            # path = "H:/Uni_Studies/Useful_Datasets_360/Dataset_3_360_Video_Viewing_Dataset_in_head_mounted_virtual_reality/360dataset/intermediateResults/sal.png"
             # cv2.imshow('',colorFrame)
 
             # plt.figure(count + 1)

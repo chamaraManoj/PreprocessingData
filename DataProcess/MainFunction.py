@@ -176,7 +176,7 @@ allFoVTraces = []
 for i in range(len(fovUserList)):
     allFoVTraces.append(fovReader.readExcelFiles(fovUserList[i]))
 
-for i in range(len(allFoVTraces)): #len(allFoVTraces)
+for i in range(1): #len(allFoVTraces)
     imProceeFuncs.getNormalizedSaliencyForTile(allFoVTraces[i], videoSalList[i], SALIENCY_VIDEO)
 
 aveAllUserFoVTraceNpArray = fovReader.processTheTrace()

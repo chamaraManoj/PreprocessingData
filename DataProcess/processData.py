@@ -59,7 +59,7 @@ class ProcessData:
                     end_y = int(self.hieght)
                     cv2.line(img, (start_x, start_y), (end_x, end_y), (255, 255, 255), cv2.LINE_AA, 0)
 
-                path = "E:/Uni_Studies/Useful_Datasets_360\Dataset_3_360_Video_Viewing_Dataset_in_head_mounted_virtual_reality/360dataset/intermediateResults/sal2.png"
+                path = "H:/Uni_Studies/Useful_Datasets_360\Dataset_3_360_Video_Viewing_Dataset_in_head_mounted_virtual_reality/360dataset/intermediateResults/sal2.png"
                 cv2.imwrite(path, img)
                 plt.imshow(img)
                 plt.show()
