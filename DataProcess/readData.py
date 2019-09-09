@@ -213,7 +213,7 @@ class ReadData:
             frameList.append(frame)
             count += 1
             # print(count)
-            if count == 15:
+            if count == 15: #500ms
                 break
         cap.release()
         # cv2.destroyAllWindows()

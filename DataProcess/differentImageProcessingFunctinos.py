@@ -1,7 +1,7 @@
 import os
 import cv2
 import numpy as np
-import statistics
+import csv
 from DataProcess import readData as rdData
 from DataProcess import readFoVData as rdFoVData
 
@@ -48,11 +48,22 @@ class ImageProcessingFunc:
     # This function return a list contatining for each user to what extent the saliency lies on her FoV
     def getNormalizedSaliencyForTile(self, fovOneVideo, videoName, videoType):
 
-        for userNum in range(len(fovOneVideo)):
-            user = fovOneVideo[userNum]
+        # This lisr contains fov and saliency score in that region
+        totSalMap = []
+        for frameSetIndex in range(0, 1800, 15): #0, 1800, 15
+            print(frameSetIndex)
+            totSalMap.append(self.getAverageSaliency500ms(frameSetIndex, videoName, videoType))
 
+        oneVideoSaliencyScore = []
+        for userNum in range(len(fovOneVideo)):  # len(fovOneVideo)
+            print("User " + str(userNum))
+            user = fovOneVideo[userNum]
+            # For a given video, for a given user, FoV region and containing saliency data is included
+            # in this list
+            oneUserSaliencyScore = []
             # sample the FoV traces every 500 ms
-            for frameNum in range(0, len(user), 15):
+            for frameNum in range(0, len(user[2]), 15):  #0, len(user[2]), 15
+                print("     subFrames  " + str(frameNum))
                 tilesInSampledFrames = []
                 # get the total number of tiles in 500 ms sample period
                 for subframe in range(15):
@@ -61,11 +72,17 @@ class ImageProcessingFunc:
                             tilesInSampledFrames.append(singletile)
 
                 # get the avaerage saliency map of 500 ms period of frames
-                averageSaliencyMap = self.getAverageSaliency500ms(frameNum, videoName, videoType)
-                print(type(averageSaliencyMap))
-                saliencyScore500ms = self.getNormalizedSaliency500ms(averageSaliencyMap, tilesInSampledFrames)
+                #averageSaliencyMap = self.getAverageSaliency500ms(frameNum, videoName, videoType)
+                saliencyScore500ms = self.getNormalizedSaliency500ms(totSalMap[int(frameNum/15)], tilesInSampledFrames)
+                oneUserSaliencyScore.append(saliencyScore500ms.copy())
+                saliencyScore500ms.clear()
+                tilesInSampledFrames.clear()
+            oneVideoSaliencyScore.append(oneUserSaliencyScore.copy())
+            oneUserSaliencyScore.clear()
 
-        return
+        self.writeSaliecnyScore(fovOneVideo, oneVideoSaliencyScore, videoName)
+
+        return oneUserSaliencyScore
 
     def getAverageSaliency500ms(self, initFrameNum, videoName, videoType):
 
@@ -80,21 +97,46 @@ class ImageProcessingFunc:
 
         normalizedSaliency = []
 
-
         tileWidth = int(averageSalMap500ms.shape[1] / 20)
         tileHeight = int(averageSalMap500ms.shape[0] / 10)
         tileSize = tileWidth * tileHeight
 
         for row in range(10):
             for col in range(20):
-                sumOfPixels = np.sum(averageSalMap500ms[row * tileHeight:(row + 1) * tileHeight, col * tileWidth:(col + 1) * tileWidth])
+                sumOfPixels = np.sum(
+                    averageSalMap500ms[row * tileHeight:(row + 1) * tileHeight, col * tileWidth:(col + 1) * tileWidth])
                 noramlizedSalForTile = sumOfPixels / (255 * tileSize)
                 # sumOfPixels = averageSalMap500ms[row * tileHeight:(row + 1) * tileHeight, col * tileWidth:(col + 1) * tileWidth]
                 #
-                tileNumber = " "+str(row * 20 + col + 1)
+                tileNumber = " " + str(row * 20 + col + 1)
                 if tileNumber in totTilesin500ms:
                     normalizedSaliency.append([1, tileNumber, noramlizedSalForTile])
                 else:
                     normalizedSaliency.append([0, tileNumber, noramlizedSalForTile])
+
+        return normalizedSaliency
+
+    # this function write the Saliency score for each video user by user
+
+    def writeSaliecnyScore(self, fovOnevideo, oneVideoSaliencyScore, videoName):
+
+        filePath = "E:\Dataset\SaliencyScore" + "\\" + videoName
+
+        if not os.path.exists(filePath):
+            os.makedirs(filePath)
+        #print(len(oneVideoSaliencyScore))
+        for userNum in range(len(oneVideoSaliencyScore)):
+            num = '{:02d}'.format(userNum)
+            userFilePath = filePath + "\\" + "userNum" + str(num) + ".csv"
+            with open(userFilePath, 'w') as writeFile:
+                writer = csv.writer(writeFile)
+                #print(len(oneVideoSaliencyScore[userNum]))
+                for i in range(len(oneVideoSaliencyScore[userNum])):
+                    #print(len(oneVideoSaliencyScore[userNum][i]))
+                    for j in range(len(oneVideoSaliencyScore[userNum][i])):
+                        tempList = [str(item) for item in oneVideoSaliencyScore[userNum][i][j]]
+                        writer.writerow(tempList)
+
+            writeFile.close()
 
         return
