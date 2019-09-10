@@ -14,17 +14,17 @@ class EncodeData:
     Executable = r'C:\ffmpeg\bin\ffmpeg.exe'
     # normal original video
 
-    inputPathNormal = r"H:\Dataset\RawVideoOriginal"
+    inputPathNormal = r"E:\Dataset\RawVideoOriginal"
     # saliency data video
-    inputPathSal = r"H:\Dataset\RawVideoOriginal"
+    inputPathSal = r"E:\Dataset\RawVideoOriginal"
     # proccessed framed for the saliency videos
-    outputPathSaliency = r"H:\Dataset\ProcessedVideoSaliency"
+    outputPathSaliency = r"E:\Dataset\ProcessedVideoSaliency"
     # processed frames for
-    outputPathNormal = r"H:\Dataset\ProcessedVideoOriginal"
+    outputPathNormal = r"E:\Dataset\ProcessedVideoOriginal"
 
     # outputPath for processed video using the interestingness prediction algorithms
     inputPathProceVideo = outputPathNormal
-    outputPathProceVideo = r"H:\Dataset\FinalProcessedVideo"
+    outputPathProceVideo = r"E:\Dataset\FinalProcessedVideo"
 
     def __init__(self, videoSalList, videoNormList, splitTime, fps, numOfRow, numOfCol):
         self.videoSalList = videoSalList

@@ -23,7 +23,7 @@ class GetFileSizes:
         # this function read the file sizes based on our implmentation. It reads the file sizes based on users FoV pattern
         # For each second of chunk, file size is stored
 
-        filePath = r"H:\Dataset\FinalProcessedVideo" + "\\" + "ProcessedVideo_algo_1_Q" + str(qualityLevl) + "\\" + \
+        filePath = r"E:\Dataset\FinalProcessedVideo" + "\\" + "ProcessedVideo_algo_1_Q" + str(qualityLevl) + "\\" + \
                    videoList[videoId] + "\\" + "frame_"
         allFramesAllFileSize = []
         allFramesChunkFileSize = []
@@ -103,7 +103,7 @@ class GetFileSizes:
     # This function read the video sizes related to the Rubiks implementation
     def readRubiksFileSize(self, videoId, videoList):
 
-        filePath = r"H:\Dataset\FinalProcessedVideo" + "\\" + "Rubiks" + "\\" + \
+        filePath = r"E:\Dataset\FinalProcessedVideo" + "\\" + "Rubiks" + "\\" + \
                    videoList[videoId] + "\\" + "frame_"
         allFramesAllFileSize = []
         allFramesChunkFileSize = []
@@ -193,7 +193,7 @@ class GetFileSizes:
                            fovPlus,
                            frameCategory):
 
-        filePath = "H:\Dataset\FileSizeStat" + "\\" + "FileSize_algo_" + str(algo) + "_" + "Q" + str(
+        filePath = "E:\Dataset\FileSizeStat" + "\\" + "FileSize_algo_" + str(algo) + "_" + "Q" + str(
             qualityLevl) + "_" + str(fovPlus) + "\\" + videoList[videoId] + "\\" + str(frameCategory)
 
         if not os.path.exists(filePath):
@@ -220,7 +220,7 @@ class GetFileSizes:
 
     # function override to write the data related to Rubiks Video
     def writeDataRubiksMethod(self, allFramesAllFileSize, allFramesChunkFileSize, videoId, videoList, frameCategory):
-        filePath = "H:\Dataset\FileSizeStat" + "\\" + "FileSize_algo_" + "Rubiks" + "_" + "\\" + videoList[
+        filePath = "E:\Dataset\FileSizeStat" + "\\" + "FileSize_algo_" + "Rubiks" + "_" + "\\" + videoList[
             videoId] + "\\" + str(frameCategory)
 
         if not os.path.exists(filePath):

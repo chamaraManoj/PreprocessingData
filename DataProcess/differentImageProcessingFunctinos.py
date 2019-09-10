@@ -8,6 +8,10 @@ from DataProcess import readFoVData as rdFoVData
 
 class ImageProcessingFunc:
 
+    frameSkipCount = 15
+    numOfRows = 10
+    numOfCol = 20
+
     def __init__(self):
         return
 
@@ -20,7 +24,7 @@ class ImageProcessingFunc:
         alpha = 0.2
         beta = 1 - alpha
 
-        fileOutPath = "H:/Dataset/RawSaliePlusRawData/" + videoNormList[videoIdSal] + "/"
+        fileOutPath = "E:/Dataset/RawSaliePlusRawData/" + videoNormList[videoIdSal] + "/"
         if not os.path.exists(fileOutPath):
             os.mkdir(fileOutPath)
 
@@ -58,27 +62,29 @@ class ImageProcessingFunc:
         # value of that pixel should be 255. Thereforemm divide the calculated sum of pixel value by 255 * total num of
         # pixels in the tile.
 
-        for frameSetIndex in range(0, 1800, 15):  # 0, 1800, 15
+        for frameSetIndex in range(0, 1800, self.frameSkipCount):  # 0, 1800, 15
             print(frameSetIndex)
             salMap = self.getAverageSaliency500ms(frameSetIndex, videoName, videoType)
             totNormalizedSaliency.append(self.getNormalizedSaliency500ms(salMap))
 
         oneVideoSaliencyScore = []
         tUserFOVData = []
+        oneUserSaliencyScore = []
 
-        for userNum in range(2):  # len(fovOneVideo)
+        for userNum in range(len(fovOneVideo)):  # len(fovOneVideo)
             print("User " + str(userNum))
             user = fovOneVideo[userNum]
             # For a given video, for a given user, FoV region and containing saliency data is included
             # in this list
-            oneUserSaliencyScore = []
+
+            tilesInSampledFrames = []
             # sample the FoV traces every 500 ms
             # print(len(user[2]))
-            for frameNum in range(0, 30, 15):  # 0, len(user[2]), 15
+            for frameNum in range(0, len(user[2]), self.frameSkipCount):  # 0, len(user[2]), 15
                 # print("     subFrames  " + str(frameNum))
-                tilesInSampledFrames = []
+
                 # get the total number of tiles in 500 ms sample period
-                for subframe in range(15):
+                for subframe in range(self.frameSkipCount):
                     for singletile in user[2][frameNum + subframe]:
                         if not singletile in tilesInSampledFrames:
                             tilesInSampledFrames.append(singletile)
@@ -88,7 +94,7 @@ class ImageProcessingFunc:
 
                 # get the avaerage saliency map of 500 ms period of frames
                 # averageSaliencyMap = self.getAverageSaliency500ms(frameNum, videoName, videoType)
-                saliencyScore500ms = self.getSaliencyScore(totNormalizedSaliency[int(frameNum / 15)],
+                saliencyScore500ms = self.getSaliencyScore(totNormalizedSaliency[int(frameNum / self.frameSkipCount)],
                                                            tilesInSampledFrames)
 
                 oneUserSaliencyScore.append(saliencyScore500ms.copy())
@@ -119,14 +125,14 @@ class ImageProcessingFunc:
 
         normalizedSaliency = []
 
-        for row in range(10):
-            for col in range(20):
-                tileNumber = " " + str(row * 20 + col)
+        for row in range(self.numOfRows):
+            for col in range(self.numOfCol):
+                tileNumber = " " + str(row * self.numOfCol + col)
                 if tileNumber in tilesInSampledFrames:
-                    print([1, tileNumber, averagedSalMap[row * 20 + col]])
-                    normalizedSaliency.append([1, tileNumber, averagedSalMap[row * 20 + col]])
+                    print([1, tileNumber, averagedSalMap[row * self.numOfCol + col]])
+                    normalizedSaliency.append([1, tileNumber, averagedSalMap[row * self.numOfCol + col]])
                 else:
-                    normalizedSaliency.append([0, tileNumber, averagedSalMap[row * 20 + col]])
+                    normalizedSaliency.append([0, tileNumber, averagedSalMap[row * self.numOfCol + col]])
 
         return normalizedSaliency
 
@@ -183,7 +189,7 @@ class ImageProcessingFunc:
 
     def writeSaliecnyScore(self, fovOnevideo, oneVideoSaliencyScore, videoName):
 
-        filePath = "H:\Dataset\SaliencyScore" + "\\" + videoName
+        filePath = "E:\Dataset\SaliencyScore" + "\\" + videoName+"_SalScore"
 
         if not os.path.exists(filePath):
             os.makedirs(filePath)
@@ -191,7 +197,7 @@ class ImageProcessingFunc:
         for userNum in range(len(oneVideoSaliencyScore)):
             num = '{:02d}'.format(userNum)
             userFilePath = filePath + "\\" + "userNum" + str(num) + ".csv"
-            with open(userFilePath, 'w') as writeFile:
+            with open(userFilePath, 'w', newline='') as writeFile:
                 writer = csv.writer(writeFile)
                 # print(len(oneVideoSaliencyScore[userNum]))
                 for i in range(len(oneVideoSaliencyScore[userNum])):

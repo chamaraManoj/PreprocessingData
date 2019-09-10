@@ -4,9 +4,8 @@ from DataProcess import processData as procData
 from DataProcess import readFoVData as rdFoVData
 from DataProcess import getFileSizes as gtFileVSize
 from DataProcess import differentImageProcessingFunctinos as difImageProceFunc
+from DataProcess import processNormalSalMaps as procNorSalMaps
 import numpy as np
-
-
 
 # ====================================================================================================================
 # main implemenataion starts==========================================================================================
@@ -25,6 +24,11 @@ videoNormListForSaliencyAnalysis = ['RollerCoster', 'PacMan', 'SharkShipWreck', 
 
 fovUserList = ["coaster_user", "pacman_user", "diving_user", "drive_user", "game_user",
                "landscape_user", "panel_user", "ride_user", "sport_user"]
+
+normSalList = ["coaster_saliency_n_SalScore", "diving_saliency_n_SalScore", "diving_saliency_n_SalScore",
+               "drive_saliency_n_SalScore", "game_saliency_n_SalScore",
+               "landscape_saliency_n_SalScore", "panel_saliency_n_SalScore", "ride_saliency_n_SalScore",
+               "sport_saliency_n_SalScore"]
 
 # 360p: 426x240 => 426/5 x 240/4
 # 480p: 854x480
@@ -171,15 +175,21 @@ while line:
 f.close()
 
 # read the FoV data and process the tiles  for each frame
-fovReader = rdFoVData.ReadFoVData()
-allFoVTraces = []
-for i in range(len(fovUserList)):
-    allFoVTraces.append(fovReader.readExcelFiles(fovUserList[i]))
+############################
+# fovReader = rdFoVData.ReadFoVData()
+# allFoVTraces = []
+# for i in range(len(fovUserList)):
+#     allFoVTraces.append(fovReader.readExcelFiles(fovUserList[i]))
+#
+# for i in range(len(allFoVTraces)):  # len(allFoVTraces)
+#     imProceeFuncs.getNormalizedSaliencyForTile(allFoVTraces[i], videoSalList[i], SALIENCY_VIDEO)
+##############################
 
-for i in range(1): #len(allFoVTraces)
-    imProceeFuncs.getNormalizedSaliencyForTile(allFoVTraces[i], videoSalList[i], SALIENCY_VIDEO)
 
-aveAllUserFoVTraceNpArray = fovReader.processTheTrace()
+#This set of commands call the functions to draw the normalized saliency map with FOV in a heat map
+processSalData  = procNorSalMaps.ProcNorSalMaps(normSalList)
+processSalData.readData()
+processSalData.getPercentageSaliencyOnTiles()
 
 # =====End of reading FoV traces and get average value for whole the video using all the users=========================
 
@@ -188,10 +198,14 @@ aveAllUserFoVTraceNpArray = fovReader.processTheTrace()
 # transmission and the client end process do not have any issues in processing. In the mean time we try to read the
 # file sizes related to Rubiks as well
 
-fileSizeReader = gtFileVSize.GetFileSizes(aveAllUserFoVTraceNpArray, NUM_OF_ROW, NUM_OF_COL)
+#####################
+# aveAllUserFoVTraceNpArray = fovReader.processTheTrace()
+# fileSizeReader = gtFileVSize.GetFileSizes(aveAllUserFoVTraceNpArray, NUM_OF_ROW, NUM_OF_COL)
+
 # for i in range(qualityTuple.__len__()):
 #     if i == 1:
 #         fileSizeReader.readFileSizeOurImp(qualityTuple[i], videoIdNor, videoNormList, ALGORITHM_1)
 # fileSizeReader.readRubiksFileSize(videoIdNor, videoNormList)
+#####################
 # ====================================================================================================================
 # ==== main implementation ends=======================================================================================
