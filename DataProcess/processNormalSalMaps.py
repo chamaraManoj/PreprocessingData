@@ -95,27 +95,36 @@ class ProcNorSalMaps:
                 singleVideoData.append(singleVideoSingleUserData)
             mulVideoData.append(singleVideoData)
 
+        self.writePercentageSaliency(mulVideoData)
+
         return
 
-    def writePercentageSaliency(self, fovOnevideo, oneVideoSaliencyScore, videoName):
+    def writePercentageSaliency(self, mulVideoData):
 
-        filePath = "E:\Dataset\SaliencyScore" + "\\" + videoName + "_SalScore"
+        for videoNum in range(len(self.normSaLlist)):
+            filePath = "E:\Dataset\PercentageSaliency" + "\\" + self.normSaLlist[videoNum] + "_percentageSaliency"
 
-        if not os.path.exists(filePath):
-            os.makedirs(filePath)
-        # print(len(oneVideoSaliencyScore))
-        for userNum in range(len(oneVideoSaliencyScore)):
-            num = '{:02d}'.format(userNum)
-            userFilePath = filePath + "\\" + "userNum" + str(num) + ".csv"
-            with open(userFilePath, 'w', newline='') as writeFile:
-                writer = csv.writer(writeFile)
-                # print(len(oneVideoSaliencyScore[userNum]))
-                for i in range(len(oneVideoSaliencyScore[userNum])):
-                    # print(len(oneVideoSaliencyScore[userNum][i]))
-                    for j in range(len(oneVideoSaliencyScore[userNum][i])):
-                        tempList = [str(item) for item in oneVideoSaliencyScore[userNum][i][j]]
+            if not os.path.exists(filePath):
+                os.makedirs(filePath)
+
+            singleVideo = mulVideoData[videoNum]
+
+            for userNum in range(len(singleVideo)):
+                num = '{:02d}'.format(userNum)
+                userFilePath = filePath + "\\" + "userNum" + str(num) + ".csv"
+                singelUser = singleVideo[userNum]
+                with open(userFilePath, 'w', newline='') as writeFile:
+                    writer = csv.writer(writeFile)
+                    # print(len(oneVideoSaliencyScore[userNum]))
+                    writer.writerow(['% FoV tiles/TotTiles in HighSal', '% OoV tiles/TotTiles in HighSal',
+                                     '% FoV tiles/TotFovTiles', '% OoV tiles/TotOovTiles'])
+                    for i in range(len(singelUser)):
+                        # print(len(oneVideoSaliencyScore[userNum][i]))
+                        # for j in range(len(oneVideoSaliencyScore[userNum][i])):
+                        singleFrameSetData = singelUser[i]
+                        tempList = [str(item) for item in singleFrameSetData]
                         writer.writerow(tempList)
 
-            writeFile.close()
+                writeFile.close()
 
         return
