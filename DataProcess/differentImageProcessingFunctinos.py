@@ -16,6 +16,7 @@ class ImageProcessingFunc:
         return
 
     # function to extract the salient region in the funciton and print saliency map on top of the original frame
+
     def getSalientRegion(self, frameListSal, frameListOri, frameNumList, videoNormList, videoIdSal):
         print(type(frameListSal[0]))
         shapeFrameSal = frameListSal[0].shape

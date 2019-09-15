@@ -11,20 +11,25 @@ import numpy as np
 # main implemenataion starts==========================================================================================
 
 
-# 'coaster2_saliency_n'  'pacman_saliency_n' is removed for the moment could not get exact 1 min
+#   'pacman_saliency_n' is removed for the moment could not get exact 1 min
+#Names of the original saliency map videos
 videoSalList = ['coaster_saliency_n', 'pacman_saliency_n', 'diving_saliency_n', 'drive_saliency_n', 'game_saliency_n',
                 'landscape_saliency_n', 'panel_saliency_n', 'ride_saliency_n', 'sport_saliency_n']
 
+#Names of the original videos
 videoNormList = ['ChariotRace', 'DrivingWith', 'HogRider', 'KangarooIsland', 'MegaCoster', 'PacMan', 'PerlisPanel',
                  'RollerCoster', 'SFRSport', 'SharkShipWreck']
-# 'MegaCoster' 'PacMan'
+# 'MegaCoster'
+#Defined the names list for reading original videos which is exactly matching the saliency map video details
 videoNormListForSaliencyAnalysis = ['RollerCoster', 'PacMan', 'SharkShipWreck', 'DrivingWith', 'HogRider',
                                     'KangarooIsland',
                                     'PerlisPanel', 'ChariotRace', 'SFRSport']
 
+#file names containing the FoV traces of the users
 fovUserList = ["coaster_user", "pacman_user", "diving_user", "drive_user", "game_user",
                "landscape_user", "panel_user", "ride_user", "sport_user"]
 
+#Names of the list containing the
 normSalList = ["coaster_saliency_n_SalScore", "diving_saliency_n_SalScore", "diving_saliency_n_SalScore",
                "drive_saliency_n_SalScore", "game_saliency_n_SalScore",
                "landscape_saliency_n_SalScore", "panel_saliency_n_SalScore", "ride_saliency_n_SalScore",
@@ -152,11 +157,7 @@ line = f.readline()
 bitRateList = []
 tempList = []
 while line:
-    # in python 2+
-    # print line
-    # in python 3 print is a builtin function, so
-    # print(line)
-    # use realine() to read next line
+
     line = line.strip()
     if line != "":
         valueStr = line.split(",")
@@ -186,10 +187,16 @@ f.close()
 ##############################
 
 
-#This set of commands call the functions to draw the normalized saliency map with FOV in a heat map
+#Read the normalized saliency data from the file and process them to find the percentage saliecny in the FoV and OoV
+# regions
+# @normSalList = List containing the file names which includes the normalized saliency map data
 processSalData  = procNorSalMaps.ProcNorSalMaps(normSalList)
+
+#read the normalized saliency map data
 processSalData.readData()
-processSalData.getPercentageSaliencyOnTiles()
+#process the percentage saliency in the region.
+isRelative = True
+processSalData.getPercentageSaliencyOnTiles(isRelative)
 
 # =====End of reading FoV traces and get average value for whole the video using all the users=========================
 

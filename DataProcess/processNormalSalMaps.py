@@ -45,7 +45,14 @@ class ProcNorSalMaps:
 
         return
 
-    def getPercentageSaliencyOnTiles(self):
+    # This function process the read data (normalized saliency map for 500ms time (15 frames)) with relevant to the
+    # given parameter
+    # @isRelative : Specify whether to consider relative or absolute percentage saliency on tiles
+    # If relative - get the relative percentage saliency of tiles considering the first 40 tiles containing the highest
+    # saliency and how many FoV and OoV tiles overlap on those tiles
+    # if absolute = get the absolute saliency on the FoV and OoV tiles considering the normalized saliency of those areas
+    # separatley
+    def getPercentageSaliencyOnTiles(self, isRelative):
 
         mulVideoData = []
         for videoNum in range(len(self.mulVideo)):  # len(self.mulVideo)
@@ -55,42 +62,64 @@ class ProcNorSalMaps:
 
                 singleVideoSingleUserData = []
                 for frameSet in self.mulVideo[videoNum][userNum]:  # len(self.mulVideo[videoNum][userNum])
-                    #
-                    # for tileNum in range(len(self.mulVideo[videoNum][userNum][
-                    #                                     frameSetNum])):  # len(self.mulVideo[videoNum][userNum][singleFrameNum])
+
                     isInFoV = frameSet[0]
                     normSalVal = frameSet[1]
 
                     npInFoV = np.asarray(isInFoV)
                     npInFoV = npInFoV.astype(np.int)
                     npNormSalVal = np.asarray(normSalVal)
+                    # if relative percentage of saliency requested
 
-                    largest40Elements = np.argpartition(npNormSalVal, -self.limitOfLargestElements)[
-                                        -self.limitOfLargestElements:]
-                    # for ind in largest40Elements:
-                    #     print(npNormSalVal[ind])
-                    # npNormSalVal.sort()
+                    if isRelative:
+                        largest40Elements = np.argpartition(npNormSalVal, -self.limitOfLargestElements)[
+                                            -self.limitOfLargestElements:]
+                        # for ind in largest40Elements:
+                        #     print(npNormSalVal[ind])
+                        # npNormSalVal.sort()
 
-                    numOfFoVTilesInSal = 0
-                    numofOoVTilesInSal = 0
+                        numOfFoVTilesInSal = 0
+                        numofOoVTilesInSal = 0
 
-                    for ind in largest40Elements:
-                        if int(isInFoV[ind]) == 1:
-                            numOfFoVTilesInSal += 1
-                        else:
-                            numofOoVTilesInSal += 1
+                        for ind in largest40Elements:
+                            if int(isInFoV[ind]) == 1:
+                                numOfFoVTilesInSal += 1
+                            else:
+                                numofOoVTilesInSal += 1
 
-                    percFoVTilesRelative2LargestSalValues = numOfFoVTilesInSal * 100 / self.limitOfLargestElements
-                    percOoVTilesRelative2LargestSalValues = numofOoVTilesInSal * 100 / self.limitOfLargestElements
+                        percFoVTilesRelative2LargestSalValues = numOfFoVTilesInSal * 100 / self.limitOfLargestElements
+                        percOoVTilesRelative2LargestSalValues = numofOoVTilesInSal * 100 / self.limitOfLargestElements
 
-                    totalFoVTiles = sum((npInFoV) > 0)
+                        totalFoVTiles = sum((npInFoV) > 0)
 
-                    percFoVTilesRelative2TotFoVTiles = numOfFoVTilesInSal * 100 / totalFoVTiles
-                    percOoVTilesRelative2TotOoVTiles = numofOoVTilesInSal * 100 / (200 - totalFoVTiles)
+                        percFoVTilesRelative2TotFoVTiles = numOfFoVTilesInSal * 100 / totalFoVTiles
+                        percOoVTilesRelative2TotOoVTiles = numofOoVTilesInSal * 100 / (200 - totalFoVTiles)
 
-                    singleFramestData = [percFoVTilesRelative2LargestSalValues,
-                                         percOoVTilesRelative2LargestSalValues, percFoVTilesRelative2TotFoVTiles,
-                                         percOoVTilesRelative2TotOoVTiles]
+                        singleFramestData = [percFoVTilesRelative2LargestSalValues,
+                                             percOoVTilesRelative2LargestSalValues, percFoVTilesRelative2TotFoVTiles,
+                                             percOoVTilesRelative2TotOoVTiles]
+
+                    # if the absolute saliency is requested
+                    else:
+                        indFoVTiles = np.where(isInFoV == 1)
+                        indOoVTiles = np.where(isInFoV == 0)
+
+                        # get the sum of normalized saliency value in a given region FoV or OoV
+                        totFoVSaliency = sum(npNormSalVal[indFoVTiles])
+                        totOoVSaliency = sum(npNormSalVal[indOoVTiles])
+
+                        # get the percentage value of absolute normalized saliecny for FoV or OoV.
+                        # formula = (sum of normalized saliency in the FoV/OoV region)*100
+                        #           -------------------------------------------------------
+                        #           (Maximum normalized saliency that a FoV/OoV region can have)
+                        #           denominator is equal to the number of FoV/OoV tiles in the frame
+
+                        percentageSaliencyFoV = totFoVSaliency * 100 / indFoVTiles.size
+                        percentageSaliencyOoV = totOoVSaliency * 100 / indOoVTiles.size
+
+                        singleFramestData = [percentageSaliencyFoV, percentageSaliencyOoV]
+
+                        
                     singleVideoSingleUserData.append(singleFramestData)
                 singleVideoData.append(singleVideoSingleUserData)
             mulVideoData.append(singleVideoData)
