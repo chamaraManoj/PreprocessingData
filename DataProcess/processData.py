@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import math
 
 
+# This class contains following functions
 class ProcessData:
     threshImages = []
     qualityList = []
@@ -126,4 +127,3 @@ class ProcessData:
                 for j in range(self.numOfCol):
                     print(tempQuality[i * self.numOfCol + j], end=" ")
                 print(" ")
-

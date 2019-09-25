@@ -56,10 +56,10 @@ class ProcNorSalMaps:
 
         mulVideoData = []
         for videoNum in range(len(self.mulVideo)):  # len(self.mulVideo)
-
+            print("Video Num: ", videoNum)
             singleVideoData = []
             for userNum in range(len(self.mulVideo[videoNum])):  # len(self.mulVideo[videoNum])
-
+                print("                 USer Num: ", userNum)
                 singleVideoSingleUserData = []
                 for frameSet in self.mulVideo[videoNum][userNum]:  # len(self.mulVideo[videoNum][userNum])
 
@@ -69,6 +69,7 @@ class ProcNorSalMaps:
                     npInFoV = np.asarray(isInFoV)
                     npInFoV = npInFoV.astype(np.int)
                     npNormSalVal = np.asarray(normSalVal)
+                    npNormSalVal = npNormSalVal.astype(np.float)
                     # if relative percentage of saliency requested
 
                     if isRelative:
@@ -101,38 +102,41 @@ class ProcNorSalMaps:
 
                     # if the absolute saliency is requested
                     else:
-                        indFoVTiles = np.where(isInFoV == 1)
-                        indOoVTiles = np.where(isInFoV == 0)
+                        indFoVTiles = np.where(npInFoV == 1)
+                        indOoVTiles = np.where(npInFoV == 0)
 
                         # get the sum of normalized saliency value in a given region FoV or OoV
-                        totFoVSaliency = sum(npNormSalVal[indFoVTiles])
-                        totOoVSaliency = sum(npNormSalVal[indOoVTiles])
+                        x = npNormSalVal[indFoVTiles]
+                        totFoVSaliency = sum(npNormSalVal[indFoVTiles[0]])
+                        totOoVSaliency = sum(npNormSalVal[indOoVTiles[0]])
 
                         # get the percentage value of absolute normalized saliecny for FoV or OoV.
                         # formula = (sum of normalized saliency in the FoV/OoV region)*100
                         #           -------------------------------------------------------
                         #           (Maximum normalized saliency that a FoV/OoV region can have)
                         #           denominator is equal to the number of FoV/OoV tiles in the frame
-
-                        percentageSaliencyFoV = totFoVSaliency * 100 / indFoVTiles.size
-                        percentageSaliencyOoV = totOoVSaliency * 100 / indOoVTiles.size
+                        lenF = len(indFoVTiles[0])
+                        percentageSaliencyFoV = totFoVSaliency * 100 / len(indFoVTiles[0])
+                        percentageSaliencyOoV = totOoVSaliency * 100 / len(indOoVTiles[0])
 
                         singleFramestData = [percentageSaliencyFoV, percentageSaliencyOoV]
 
-                        
                     singleVideoSingleUserData.append(singleFramestData)
                 singleVideoData.append(singleVideoSingleUserData)
             mulVideoData.append(singleVideoData)
 
-        self.writePercentageSaliency(mulVideoData)
+        self.writePercentageSaliency(mulVideoData, isRelative)
 
         return
 
-    def writePercentageSaliency(self, mulVideoData):
+    def writePercentageSaliency(self, mulVideoData, isRelative):
 
         for videoNum in range(len(self.normSaLlist)):
             filePath = "E:\Dataset\PercentageSaliency" + "\\" + self.normSaLlist[videoNum] + "_percentageSaliency"
-
+            if isRelative:
+                filePath = filePath + "_Reltive"
+            else:
+                filePath = filePath + "_Absolute"
             if not os.path.exists(filePath):
                 os.makedirs(filePath)
 
@@ -145,8 +149,11 @@ class ProcNorSalMaps:
                 with open(userFilePath, 'w', newline='') as writeFile:
                     writer = csv.writer(writeFile)
                     # print(len(oneVideoSaliencyScore[userNum]))
-                    writer.writerow(['% FoV tiles/TotTiles in HighSal', '% OoV tiles/TotTiles in HighSal',
+                    if isRelative:
+                        writer.writerow(['% FoV tiles/TotTiles in HighSal', '% OoV tiles/TotTiles in HighSal',
                                      '% FoV tiles/TotFovTiles', '% OoV tiles/TotOovTiles'])
+                    else:
+                        writer.writerow(['percentageSaliencyFoV', 'percentageSaliencyOoV'])
                     for i in range(len(singelUser)):
                         # print(len(oneVideoSaliencyScore[userNum][i]))
                         # for j in range(len(oneVideoSaliencyScore[userNum][i])):

@@ -6,30 +6,31 @@ from DataProcess import getFileSizes as gtFileVSize
 from DataProcess import differentImageProcessingFunctinos as difImageProceFunc
 from DataProcess import processNormalSalMaps as procNorSalMaps
 import numpy as np
+import os
 
 # ====================================================================================================================
 # main implemenataion starts==========================================================================================
 
 
 #   'pacman_saliency_n' is removed for the moment could not get exact 1 min
-#Names of the original saliency map videos
+# Names of the original saliency map videos
 videoSalList = ['coaster_saliency_n', 'pacman_saliency_n', 'diving_saliency_n', 'drive_saliency_n', 'game_saliency_n',
                 'landscape_saliency_n', 'panel_saliency_n', 'ride_saliency_n', 'sport_saliency_n']
 
-#Names of the original videos
+# Names of the original videos
 videoNormList = ['ChariotRace', 'DrivingWith', 'HogRider', 'KangarooIsland', 'MegaCoster', 'PacMan', 'PerlisPanel',
                  'RollerCoster', 'SFRSport', 'SharkShipWreck']
 # 'MegaCoster'
-#Defined the names list for reading original videos which is exactly matching the saliency map video details
+# Defined the names list for reading original videos which is exactly matching the saliency map video details
 videoNormListForSaliencyAnalysis = ['RollerCoster', 'PacMan', 'SharkShipWreck', 'DrivingWith', 'HogRider',
                                     'KangarooIsland',
                                     'PerlisPanel', 'ChariotRace', 'SFRSport']
 
-#file names containing the FoV traces of the users
+# file names containing the FoV traces of the users
 fovUserList = ["coaster_user", "pacman_user", "diving_user", "drive_user", "game_user",
                "landscape_user", "panel_user", "ride_user", "sport_user"]
 
-#Names of the list containing the
+# Names of the list containing the
 normSalList = ["coaster_saliency_n_SalScore", "diving_saliency_n_SalScore", "diving_saliency_n_SalScore",
                "drive_saliency_n_SalScore", "game_saliency_n_SalScore",
                "landscape_saliency_n_SalScore", "panel_saliency_n_SalScore", "ride_saliency_n_SalScore",
@@ -67,18 +68,6 @@ ALGORITHM_1 = 1
 SALIENCY_VIDEO = 0
 RGB_VIDEO = 1
 
-# ====================================================================================================================
-# [raw,col] is the index of a given tile
-# tileTuple = ([0, 0], [0, 1], [0, 2], [0, 3], [0, 4],
-#              [1, 0], [1, 1], [1, 2], [1, 3], [1, 4],
-#              [2, 0], [2, 1], [2, 2], [2, 3], [2, 4],
-#              [3, 0], [3, 1], [3, 2], [3, 3], [3, 4],)
-
-# quality ratings
-# encRateTuple = (480, 720, 1080)
-# ====================================================================================================================
-
-
 NUM_OF_COL = 5
 NUM_OF_ROW = 4
 
@@ -88,10 +77,9 @@ videoIdSal = 3
 videoIdNor = 1
 # ====================================================================================================================
 # slice the corresponding video to 1s equal size video segments
-# preProcee = PreProcessData(videoSalList)
-preProcessData = encData.EncodeData(videoSalList, videoNormList, 1, 30, NUM_OF_ROW, NUM_OF_COL)
-##preProcessData.splitVideoSaliency(3)
-##preProcessData.splitToTiles(1, 3840, 2160, 2,resolution)
+## encodeFunctions = encData.EncodeData(videoSalList, videoNormList, 1, 30, NUM_OF_ROW, NUM_OF_COL)
+##encodeFunctions.splitVideoSaliency(3)
+##encodeFunctions.splitToTiles(1, 3840, 2160, 2,resolution)
 # ====end of prepocessing data=========================================================================================
 
 
@@ -99,28 +87,39 @@ preProcessData = encData.EncodeData(videoSalList, videoNormList, 1, 30, NUM_OF_R
 # Start reading the frame
 readFrame = rdData.ReadData(videoSalList, videoNormListForSaliencyAnalysis, isAll)
 imProceeFuncs = difImageProceFunc.ImageProcessingFunc()
-
 # Draw saliency region on top of the video frame
-# for i in range(len(videoSalList)):
-#     print("frame")
-#     print(i)
-#     if i == 1:
-#         print(1)
-#     readFrame.readSalData(i)
-#
-#     readFrame.readOrgData(i)
-#     frameListSal = readFrame.frameListSal
-#     frameListOri = readFrame.frameListOrg
-#     frameNumList = readFrame.randomFrames
-#
-#     imProceeFuncs.getSalientRegion(frameListSal, frameListOri, frameNumList, videoNormListForSaliencyAnalysis, i)
+for i in range(len(videoSalList)):
+    print("frame")
+    print(i)
+    if i == 1:
+        print(1)
+
+    if i ==1:
+        break
+
+    # if i == len(videoSalList):
+    readFrame.readSalData(3)
+    readFrame.readOrgData(3)
+
+    # get the reandom frame indices from the readFrame objects generated in readSalData funciton
+    randomFrames = readFrame.randomFrames
+    tempNewPanoSalpath = "E:/Dataset/"+videoNormList[1]  # path for Panosalnet data set
+    readFrame.readImageFrames(randomFrames, tempNewPanoSalpath)
+
+    frameListSal = readFrame.frameListSal
+    frameListOri = readFrame.frameListOrg
+    frameListPanoSal = readFrame.frameListPanoSal
+    frameNumList = readFrame.randomFrames
+    imProceeFuncs.getSalientRegion(frameListPanoSal, frameListOri, frameNumList, videoNormListForSaliencyAnalysis,
+                                   i)
+
 
 # read the data related to the frames
-##widthOfFrame = readFrame.width
-##hieghtOfFrame = readFrame.height
+# widthOfFrame = readFrame.
+# hieghtOfFrame = readFrame.height
 # reference to the extracted data
-##frameList = readFrame.frameList
-
+# frameList = readFrame.frameList
+imageMetaData = readFrame.getImageMetaData()
 # ======End of reading frame data=====================================================================================
 
 
@@ -128,7 +127,10 @@ imProceeFuncs = difImageProceFunc.ImageProcessingFunc()
 # processing the data using a naive algorithm. More details are in the class
 # implementation
 ##qualityList = []
-##processFrames = procData.ProcessData(frameList,tileTuple,widthOfFrame,hieghtOfFrame,encRateTuple,qualityList,NUM_OF_ROW,NUM_OF_COL)
+
+
+# processFrames = procData.ProcessData(frameList, tileTuple, widthOfFrame, hieghtOfFrame, encRateTuple, qualityList,
+#                                      NUM_OF_ROW, NUM_OF_COL)
 ##processFrames.thresholdImage();
 ##qualityList = processFrames.qualityList
 
@@ -172,7 +174,7 @@ while line:
     line = f.readline()
 # for i in range(len(encoderResList)):
 # if (i == 3):
-# preProcessData.storeData(1, bitRateList, ALGORITHM_1, encoderResList, i)
+# encodeFunctions.storeData(1, bitRateList, ALGORITHM_1, encoderResList, i)
 f.close()
 
 # read the FoV data and process the tiles  for each frame
@@ -187,17 +189,18 @@ f.close()
 ##############################
 
 
-#Read the normalized saliency data from the file and process them to find the percentage saliecny in the FoV and OoV
+# Read the normalized saliency data from the file and process them to find the percentage saliecny in the FoV and OoV
 # regions
 # @normSalList = List containing the file names which includes the normalized saliency map data
-processSalData  = procNorSalMaps.ProcNorSalMaps(normSalList)
+processSalData = procNorSalMaps.ProcNorSalMaps(normSalList)
 
-#read the normalized saliency map data
+# read the normalized saliency map data
 processSalData.readData()
-#process the percentage saliency in the region.
-isRelative = True
+# process the percentage saliency in the region.
+isRelative = False
 processSalData.getPercentageSaliencyOnTiles(isRelative)
-
+# isRelative = True
+# processSalData.getPercentageSaliencyOnTiles(isRelative)
 # =====End of reading FoV traces and get average value for whole the video using all the users=========================
 
 # =====================================================================================================================

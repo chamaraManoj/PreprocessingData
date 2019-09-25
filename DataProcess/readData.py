@@ -5,6 +5,14 @@ import os
 import random
 import csv
 
+
+# This class contains following functions
+# generateRandomFrames : generate rnadom number representing the image index
+# readSalData : Read saliency images from the saliency video files according to the indices given by generateRandomFrames
+# readOrgData : Read original images from the original video files according to the indices given by generateRandomFrames
+# readAnyVideoSegment : Read given video frame from a given video file
+# readImageFrames : read images from a file (this is not a video file, a normal file containing images)
+
 class ReadData:
     NUM_OF_FRAMES = 10
 
@@ -12,23 +20,47 @@ class ReadData:
     salInFilePath = "E:/Dataset/RawSaliencyData"
     normInFilePath = "E:/Dataset/RawVideoOriginal"
 
+    # lsit containging the read images
     frameListSal = []
     frameListOrg = []
     randomFrames = []
+    frameListPanoSal = []  # contain the saliency maps from new Panosalnet images
 
+    # list containing the size of the image
+    initialSalImgSize = []
+    panoSalNetSalImgSize = []
+    rgbImgSize = []
+
+    # Const
+    # @videoSalList : names of the Saliency videos,
+    # ['coaster_saliency_n', 'pacman_saliency_n', 'diving_saliency_n', 'drive_saliency_n', 'game_saliency_n',
+    # 'landscape_saliency_n', 'panel_saliency_n', 'ride_saliency_n', 'sport_saliency_n']
+    # @videoNormaList : names of the original videos,
+    # ['RollerCoster', 'PacMan', 'SharkShipWreck', 'DrivingWith', 'HogRider','KangarooIsland',
+    # 'PerlisPanel', 'ChariotRace', 'SFRSport']
+    # @isAll : whether to read all the video files or not
     def __init__(self, videoSalList, videoNormList, isAll):
         self.videoSalList = videoSalList
         self.isAll = isAll
         self.videoNormList = videoNormList
 
+    # this function generate random number list between 1 -1800 to refer the saliency and corresponding images
+    # @fps : frames per second for the video, this is 30
+    # framecount : maximum frame number of the video.
     def generateRandomFrames(self, fps, length, frameCount):
         self.randomFrames.clear()
         for i in range(10):
-            tempRanFrame = (i * fps * 5 + random.randint(0, fps * 5))
+            #---ch--this is the original one random frame generator
+            # tempRanFrame = (i * fps * 5 + random.randint(0, fps * 5))
+            #---ch--generate random image of multiplier of 15
+            tempRanFrame = (random.randint(0, 119))*15
             if tempRanFrame <= frameCount:
                 self.randomFrames.append(tempRanFrame)
         return
 
+    # This function read the saliency images from the saliency video indexed by the given ID.
+    # @videoID : number between 1- len(videoSalList), videoSalList is a parameter passed to the constuctor of this class
+    # videoSalList contains the names of saliency video files
     def readSalData(self, videoID):
         # Read specific video data to frame list
         self.frameListSal.clear()
@@ -42,15 +74,11 @@ class ReadData:
                 cap = cv2.VideoCapture(filePath)
 
                 if i == 0:
-                    self.widthSal = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-                    self.heightSal = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-                    self.fpsSal = cap.get(cv2.CAP_PROP_FPS)
-                    # cap.set(cv2.CAP_PROP_POS_AVI_RATIO, 1)
-                    # self.lengthSal = cap.get(cv2.CAP_PROP_POS_MSEC)
-                    # cap.set(cv2.CAP_PROP_POS_AVI_RATIO, 0)
+                    self.initialSalImgSize.append(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                    self.initialSalImgSize.append(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                     frameCount = cap.get(cv2.CAP_PROP_FRAME_COUNT)
                     print(frameCount)
-                    self.generateRandomFrames(self.fpsSal, 60, frameCount)
+                    self.generateRandomFrames(cap.get(cv2.CAP_PROP_FPS), 60, frameCount)
 
                 count = 0
                 sucess = False
@@ -88,8 +116,11 @@ class ReadData:
                     if count == ReadData.NUM_OF_FRAMES:
                         break
                 cap.release()
-                # cv2.destroyAllWindows()
 
+
+    # This function read the original images from the original video indexed by the given ID.
+    # @videoID : number between 1- len(videoNormList), videoNormList is a parameter passed to the constuctor of this class
+    # videoSalList contains the names of Normal (original) video files
     def readOrgData(self, videoID):
         # this function just load the video frame just in case to simulate
         # tile based segementation on top of the video frame
@@ -114,8 +145,11 @@ class ReadData:
 
             # filePath = self.normInFilePath + "/" + "DrivingWith" + ".mp4"
             cap = cv2.VideoCapture(filePath)
-            frameCount = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-            print(frameCount)
+            # frameCount = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+            # print(frameCount)
+            self.rgbImgSize.append(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            self.rgbImgSize.append(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
             if cap.isOpened:
                 sucess = True;
             count = 0;
@@ -166,6 +200,10 @@ class ReadData:
             cap.release()
             # cv2.destroyAllWindows()
 
+    # This function read any specific video frames from any video file
+    # @framNumber : video frame number to be read
+    # @videoName : videoName of the video file
+    # @videoType : Specifiy whether it is saliency video or original video
     def readAnyVideoSegment(self, frameNumber, videoName, videoType):
 
         frameList = []
@@ -178,13 +216,12 @@ class ReadData:
 
         sucess = False
 
-
         if cap.isOpened:
             sucess = True;
         count = 0;
         while sucess:
             # frameNum = self.randomFrames[count]
-            retVal = cap.set(cv2.CAP_PROP_POS_FRAMES, frameNumber + count- 1)
+            retVal = cap.set(cv2.CAP_PROP_POS_FRAMES, frameNumber + count - 1)
             sucess, frame = cap.read()
 
             # if it is saliency data request convert to GRAY scale
@@ -213,9 +250,36 @@ class ReadData:
             frameList.append(frame)
             count += 1
             # print(count)
-            if count == 15: #500ms
+            if count == 15:  # 500ms
                 break
         cap.release()
         # cv2.destroyAllWindows()
 
         return frameList
+
+    # This functino reads set of video frames for given indices from a given normal file containing PNG images
+    # @imgIndexList = list containing the images indices to be read
+    # @filePath = path for the video file
+    # additional : This function was originally created to read the saliency outputs from  PanoSalNet model
+    def readImageFrames(self, imgIndexList, filePath):
+        onlyfiles = next(os.walk(filePath))[2]
+        for i in range(len(imgIndexList)):
+            if imgIndexList[i] < len(onlyfiles)*15:
+                tempImagePath = filePath + "/frame" + str(int(imgIndexList[i])) + '.png'
+                img = cv2.imread(tempImagePath)
+
+                # get image size and width
+                if i == 0:
+                    self.panoSalNetSalImgSize.append(img.shape[1])  # width
+                    self.panoSalNetSalImgSize.append(img.shape[0])  # height
+                self.frameListPanoSal.append(img)
+
+        return
+
+    # This function returns a list containing the meta data of the images read
+    # @return : our initial saliency vide frames [width,height]
+    #             PanoSalNet frame [width,height]
+    #             Original Image [width, height]
+    def getImageMetaData(self):
+
+        return [self.initialSalImgSize,self.panoSalNetSalImgSize,self.rgbImgSize]

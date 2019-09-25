@@ -25,7 +25,7 @@ class ImageProcessingFunc:
         alpha = 0.2
         beta = 1 - alpha
 
-        fileOutPath = "E:/Dataset/RawSaliePlusRawData/" + videoNormList[videoIdSal] + "/"
+        fileOutPath = "E:/Dataset/RawSaliePlusRawData/" + videoNormList[videoIdSal]+"_Pano"+ "/"
         if not os.path.exists(fileOutPath):
             os.mkdir(fileOutPath)
 
@@ -210,3 +210,6 @@ class ImageProcessingFunc:
             writeFile.close()
 
         return
+
+
+
