@@ -67,12 +67,20 @@ class EncodeData:
             print(commandUse)
             os.system(commandUse)
 
-    def splitToTiles(self, videoID, width, height, resolutionVal, resolutionDict):
+    # This function divies the video into 1s chunk and given number of tiles as well.
+    # @videoID: ID of the video to be processed
+    # @width: width of the video
+    # @height; height of the video
+
+    def splitToTiles(self, videoID, width, height, is4K, resolutionDict):
 
         # this function split a given video into 4 x 5 tiles
-        tempInFilePath = self.inputPathNormal + "\\"  + self.videoNormList[videoID] + ".mp4"
-
-        tempOutFilePath = self.outputPathNormal + "\\" + self.videoNormList[videoID]
+        if is4K:
+            tempInFilePath = self.inputPathNormal + "\\" + self.videoNormList[videoID] + "4K"+".mp4"
+            tempOutFilePath = self.outputPathNormal + "\\" + self.videoNormList[videoID]+"4K"
+        else:
+            tempInFilePath = self.inputPathNormal + "\\" + self.videoNormList[videoID] + ".mp4"
+            tempOutFilePath = self.outputPathNormal + "\\" + self.videoNormList[videoID]+"HD"
 
         # create the main directory to store the normal video data tiles
         if not os.path.exists(tempOutFilePath):

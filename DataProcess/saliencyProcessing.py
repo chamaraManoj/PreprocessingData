@@ -7,7 +7,6 @@ from DataProcess import readFoVData as rdFoVData
 
 
 class ImageProcessingFunc:
-
     frameSkipCount = 15
     numOfRows = 10
     numOfCol = 20
@@ -25,11 +24,11 @@ class ImageProcessingFunc:
         alpha = 0.2
         beta = 1 - alpha
 
-        fileOutPath = "E:/Dataset/RawSaliePlusRawData/" + videoNormList[videoIdSal]+"_Pano"+ "/"
+        fileOutPath = "E:/Dataset/RawSaliePlusRawData/" + videoNormList[videoIdSal] + "_Pano" + "/"
         if not os.path.exists(fileOutPath):
             os.mkdir(fileOutPath)
 
-        for i in range(len(frameListSal)):
+        for i in range(len(frameNumList)):
             colorFrame = cv2.applyColorMap(frameListSal[i], cv2.COLORMAP_HOT)
             # cv2.imshow('', colorFrame)
             # finalImage = cv2.addWeighted(frameListOri[i], alpha, frameListSal[i], beta, 0)
@@ -51,6 +50,10 @@ class ImageProcessingFunc:
         return
 
     # This function return a list contatining for each user to what extent the saliency lies on her FoV
+    # @foVOneVideo : FoV traces for one video, 50 users for each video. 1800 frames for one user
+    # @videoName : video name according to  the saliency video list
+    # @videoType : whther it is Saliency Video or original RGB video
+
     def getNormalizedSaliencyForTile(self, fovOneVideo, videoName, videoType):
 
         # This list contains fov and normalized saliency score in a given tile. There 200 tiles in one frame
@@ -63,6 +66,7 @@ class ImageProcessingFunc:
         # value of that pixel should be 255. Thereforemm divide the calculated sum of pixel value by 255 * total num of
         # pixels in the tile.
 
+        #for loop to get the average saliecny map from the corresponding video.
         for frameSetIndex in range(0, 1800, self.frameSkipCount):  # 0, 1800, 15
             print(frameSetIndex)
             salMap = self.getAverageSaliency500ms(frameSetIndex, videoName, videoType)
@@ -91,6 +95,7 @@ class ImageProcessingFunc:
                             tilesInSampledFrames.append(singletile)
 
                 tilesInSampledFrames.sort()
+                # total FoV in every 15 frames
                 tUserFOVData.append(tilesInSampledFrames.copy())
 
                 # get the avaerage saliency map of 500 ms period of frames
@@ -113,15 +118,21 @@ class ImageProcessingFunc:
 
         return oneUserSaliencyScore
 
+    # This function read the saliency of 15 frames
+    # @initFrameNum : Starting frame number
+    # @videoName: name of the video
+    # @videoTye: Whether the video is Saliency of Orignal RGB video
     def getAverageSaliency500ms(self, initFrameNum, videoName, videoType):
 
         readVideoData = rdData.ReadData(None, None, None)
+
         saliencyVideoFrames = readVideoData.readAnyVideoSegment(initFrameNum, videoName, videoType)
 
         averageSaliencyMap = np.mean(saliencyVideoFrames, axis=0)
 
         return averageSaliencyMap
 
+    # Get the average
     def getSaliencyScore(self, averagedSalMap, tilesInSampledFrames):
 
         normalizedSaliency = []
@@ -190,7 +201,7 @@ class ImageProcessingFunc:
 
     def writeSaliecnyScore(self, fovOnevideo, oneVideoSaliencyScore, videoName):
 
-        filePath = "E:\Dataset\SaliencyScore" + "\\" + videoName+"_SalScore"
+        filePath = "E:\Dataset\SaliencyScore" + "\\" + videoName + "_SalScore"
 
         if not os.path.exists(filePath):
             os.makedirs(filePath)
@@ -210,6 +221,3 @@ class ImageProcessingFunc:
             writeFile.close()
 
         return
-
-
-

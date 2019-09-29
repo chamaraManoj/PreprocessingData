@@ -50,10 +50,10 @@ class ReadData:
     def generateRandomFrames(self, fps, length, frameCount):
         self.randomFrames.clear()
         for i in range(10):
-            #---ch--this is the original one random frame generator
+            # ---ch--this is the original one random frame generator
             # tempRanFrame = (i * fps * 5 + random.randint(0, fps * 5))
-            #---ch--generate random image of multiplier of 15
-            tempRanFrame = (random.randint(0, 119))*15
+            # ---ch--generate random image of multiplier of 15
+            tempRanFrame = (i * 12 + random.randint(0, 12)) * 15
             if tempRanFrame <= frameCount:
                 self.randomFrames.append(tempRanFrame)
         return
@@ -116,7 +116,6 @@ class ReadData:
                     if count == ReadData.NUM_OF_FRAMES:
                         break
                 cap.release()
-
 
     # This function read the original images from the original video indexed by the given ID.
     # @videoID : number between 1- len(videoNormList), videoNormList is a parameter passed to the constuctor of this class
@@ -264,7 +263,7 @@ class ReadData:
     def readImageFrames(self, imgIndexList, filePath):
         onlyfiles = next(os.walk(filePath))[2]
         for i in range(len(imgIndexList)):
-            if imgIndexList[i] < len(onlyfiles)*15:
+            if imgIndexList[i] < len(onlyfiles) * 15:
                 tempImagePath = filePath + "/frame" + str(int(imgIndexList[i])) + '.png'
                 img = cv2.imread(tempImagePath)
 
@@ -282,4 +281,4 @@ class ReadData:
     #             Original Image [width, height]
     def getImageMetaData(self):
 
-        return [self.initialSalImgSize,self.panoSalNetSalImgSize,self.rgbImgSize]
+        return [self.initialSalImgSize, self.panoSalNetSalImgSize, self.rgbImgSize]
