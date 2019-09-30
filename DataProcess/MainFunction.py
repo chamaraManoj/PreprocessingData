@@ -197,7 +197,7 @@ if isReadDataFunctions:
 ############################
 if isReadFoVData:
     fovReader = rdFoVData.ReadFoVData()
-    for i in range(len(fovUserList)):
+    for i in range(1): #len(fovUserList)
         allFoVTraces.append(fovReader.readExcelFiles(fovUserList[i]))
 
 # for i in range(len(allFoVTraces)):  # len(allFoVTraces)
