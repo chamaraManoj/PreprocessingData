@@ -84,7 +84,7 @@ isReadDataFunctions = False
 isProcessDataFunctions = False
 isReadFoVData = True
 
-#functions to store common data
+# functions to store common data
 allFoVTraces = []
 
 # ====================================================================================================================
@@ -139,24 +139,24 @@ if isReadDataFunctions:
 # processing the data using a naive algorithm. More details are in the class
 # implementation
 # if isProcessDataFunctions:
-    # qualityList = []
-    #
-    #
-    # -chamar- This class contains function to threshold the images. This function should be modified
-    # processFrames = procData.ProcessData(frameList, tileTuple, widthOfFrame, hieghtOfFrame, encRateTuple, qualityList,
-    #                                      NUM_OF_ROW, NUM_OF_COL)
-    # processFrames.thresholdImage();
-    # qualityList = processFrames.qualityList
-    #
-    # try:
-    #     f = open("bitRateList.txt", "w+")
-    #     for i in range(len(qualityList)):
-    #         for j in range(len(qualityList[i])):
-    #             f.write("%d," % qualityList[i][j])
-    #         f.write("\n")
-    #
-    # except:
-    #     print("file not opened")
+# qualityList = []
+#
+#
+# -chamar- This class contains function to threshold the images. This function should be modified
+# processFrames = procData.ProcessData(frameList, tileTuple, widthOfFrame, hieghtOfFrame, encRateTuple, qualityList,
+#                                      NUM_OF_ROW, NUM_OF_COL)
+# processFrames.thresholdImage();
+# qualityList = processFrames.qualityList
+#
+# try:
+#     f = open("bitRateList.txt", "w+")
+#     for i in range(len(qualityList)):
+#         for j in range(len(qualityList[i])):
+#             f.write("%d," % qualityList[i][j])
+#         f.write("\n")
+#
+# except:
+#     print("file not opened")
 
 # ======End of processing data=========================================================================================
 
@@ -174,18 +174,18 @@ if isReadDataFunctions:
 # tempList = []
 # while line:
 
-    # line = line.strip()
-    # if line != "":
-    #     valueStr = line.split(",")
-    #
-    #     if len(valueStr) != 0:
-    #         for strVal in valueStr:
-    #             tempList.append(int(strVal))
-    #     print(tempList)
+# line = line.strip()
+# if line != "":
+#     valueStr = line.split(",")
+#
+#     if len(valueStr) != 0:
+#         for strVal in valueStr:
+#             tempList.append(int(strVal))
+#     print(tempList)
 
-    # bitRateList.append(tempList.copy())
-    # tempList.clear()
-    # line = f.readline()
+# bitRateList.append(tempList.copy())
+# tempList.clear()
+# line = f.readline()
 # for i in range(len(encoderResList)):
 # if (i == 3):
 # -chamr- important function where encoding of tile is done according to our algorithm
@@ -197,7 +197,7 @@ if isReadDataFunctions:
 ############################
 if isReadFoVData:
     fovReader = rdFoVData.ReadFoVData()
-    for i in range(1): #len(fovUserList)
+    for i in range(1):  # len(fovUserList)
         allFoVTraces.append(fovReader.readExcelFiles(fovUserList[i]))
 
 # for i in range(len(allFoVTraces)):  # len(allFoVTraces)
@@ -206,15 +206,8 @@ if isReadFoVData:
 
 ########################################################################################################################
 # Function to create baseline benchmark algorithms based on the FoV
-baseLineObj = baselineMod.BaseLineModel(allFoVTraces)
+baseLineObj = baselineMod.BaseLineModel(allFoVTraces, videoNormListForSaliencyAnalysis)
 baseLineObj.processBaseLine()
-
-
-
-
-
-
-
 
 # Read the normalized saliency data from the file and process them to find the percentage saliecny in the FoV and OoV
 # regions

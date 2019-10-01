@@ -1,16 +1,21 @@
 from DataProcess import readFoVData as rdFoVData
+from DataProcess import generalFunctions as genFunc
+import numpy as np
 
 
 class BaseLineModel:
     frameSkipNum = 15
     foVVideoList = []
     videosQualityMask = []
+    videosFrameWiseFoVBin = []
 
-    def __init__(self, allFoVTiles):
+    def __init__(self, allFoVTiles, vidoeList):
         self.allFoVTiles = allFoVTiles
+        self.videoList = vidoeList
         self.numColTiles = 20
         self.numRawTiles = 10
         self.readFoVDataObj = rdFoVData.ReadFoVData()
+        self.generalFucnions = genFunc.GeneralFunctions()
         return
 
     # This function control all the baseline model tasks
@@ -28,6 +33,7 @@ class BaseLineModel:
             self.foVVideoList.append(foVUserList.copy())
 
         self.createQualityIndex()
+        self.writeFoVBinData()
         print(1)
 
     # This function creates quality indices for tiles in the frames
@@ -40,29 +46,39 @@ class BaseLineModel:
         # access the video : 8
         for videoNum in range(len(self.foVVideoList)):
             # access the user :  50
+            fovBinForFrames = np.asarray(
+                [[[0 for x in range(self.numColTiles)] for y in range(self.numRawTiles)] for frames in range(120)])
             usersQualityMask = []
             for userNum in range(len(self.foVVideoList[videoNum])):
                 # access frame  : 120
                 chunksQualityMask = []
                 for frameNum in range(len(self.foVVideoList[videoNum][userNum])):
-                    tileQualityMask = [[0 for x in range(self.numColTiles)] for y in range(self.numRawTiles)]
+                    tileQualityMask = np.asarray(
+                        [[0 for x in range(self.numColTiles)] for y in range(self.numRawTiles)])
 
                     # fill the FoV tiles as quality 1
                     for tile in self.foVVideoList[videoNum][userNum][frameNum]:
                         # rowNum = self.readFoVDataObj.getRowNumber(int(tile))
-                        rowNum = (int(tile)-1) // 20
+                        rowNum = (int(tile) - 1) // 20
                         # colNum = self.readFoVDataObj.getColNumber(int(tile))
-                        colNum = ((int(tile)-1) % 20)
+                        colNum = ((int(tile) - 1) % 20)
 
                         assert rowNum < self.numRawTiles
                         assert colNum < self.numColTiles
-                        print(colNum)
-                        print(rowNum)
                         tileQualityMask[rowNum][colNum] = 1
                     # framesQualityMask.append(tileQualityMask.copy())
+                    fovBinForFrames[frameNum] += tileQualityMask
                     chunksQualityMask.append(tileQualityMask.copy())
                 usersQualityMask.append(chunksQualityMask.copy())
-            self.videosQualityMask.append(usersQualityMask)
+            self.videosQualityMask.append(usersQualityMask.copy())
+            self.videosFrameWiseFoVBin.append(fovBinForFrames.copy())
+        return
+
+    def writeFoVBinData(self):
+
+        for i in range(len(self.videosFrameWiseFoVBin)):
+            filePath = "E:\Dataset\FoVBinForVidoes" + "\\" + self.videoList[i] + "_FoVBin"
+            self.generalFucnions.writeData(self.videosFrameWiseFoVBin[i], filePath, ["frameNum", ".csv"])
 
         return
 
