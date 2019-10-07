@@ -28,10 +28,11 @@ class ReadFoVData:
     # list of frame ID
     # list of tiles for each frame ID
     def readExcelFiles(self, videoName):
-        self.allUserDetail.clear()
+        allUserDetail = []
         self.getNameList(videoName)
         for i in range(len(self.strxlsxNameList)):
             fileName = self.strxlsxNameList[i]
+
             with open(fileName, 'rt')as f:
                 data = csv.reader(f)
                 rowCount = 0
@@ -43,8 +44,8 @@ class ReadFoVData:
                         tileNumbers.append(row[1:])
                     rowCount += 1
                 tempUserdetail = [rowCount - 1, frameNumber, tileNumbers]
-            self.allUserDetail.append(tempUserdetail)
-        return self.allUserDetail
+            allUserDetail.append(tempUserdetail)
+        return allUserDetail
 
     def processTheTrace(self):
 

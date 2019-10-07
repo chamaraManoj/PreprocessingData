@@ -24,7 +24,7 @@ videoNormList = ['ChariotRace', 'DrivingWith', 'HogRider', 'KangarooIsland', 'Me
 
 # 'MegaCoster'  #SharkShipWreck add again
 # Defined the names list for reading original videos which is exactly matching the saliency map video details
-videoNormListForSaliencyAnalysis = ['RollerCoster', 'PacMan', 'DrivingWith', 'HogRider',
+videoNormListForSaliencyAnalysis = ['RollerCoster', 'PacMan', 'SharkShipWreck','DrivingWith', 'HogRider',
                                     'KangarooIsland',
                                     'PerlisPanel', 'ChariotRace', 'SFRSport']
 
@@ -197,7 +197,7 @@ if isReadDataFunctions:
 ############################
 if isReadFoVData:
     fovReader = rdFoVData.ReadFoVData()
-    for i in range(1):  # len(fovUserList)
+    for i in range(len(fovUserList)):  # len(fovUserList)
         allFoVTraces.append(fovReader.readExcelFiles(fovUserList[i]))
 
 # for i in range(len(allFoVTraces)):  # len(allFoVTraces)
