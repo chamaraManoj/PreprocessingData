@@ -16,7 +16,7 @@ class ReadFoVData:
     # Function to create the name list of the excel reading file
     def getNameList(self,videoName):
         self.strxlsxNameList.clear()
-        filePath = "E:/Dataset/FoVData/"
+        filePath = "H:/Dataset/FoVData/"
         for i in range(self.numOfViewer):
             number = '{:02d}'.format(i + 1)
             tempFileName = filePath + videoName + str(number) + "_tile.csv"

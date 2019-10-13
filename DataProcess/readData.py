@@ -18,9 +18,9 @@ import csv
 class ReadData:
     NUM_OF_FRAMES = 10
 
-    # salInFilePath = "E:\Dataset\ProcessedVideoSaliency"
-    salInFilePath = "E:/Dataset/RawSaliencyData"
-    normInFilePath = "E:/Dataset/RawVideoOriginal"
+    # salInFilePath = "H:\Dataset\ProcessedVideoSaliency"
+    salInFilePath = "H:/Dataset/RawSaliencyData"
+    normInFilePath = "H:/Dataset/RawVideoOriginal"
 
     # lsit containging the read images
     frameListSal = []
@@ -97,7 +97,7 @@ class ReadData:
                     # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-                    # path = "E:/Uni_Studies/Useful_Datasets_360/Dataset_3_360_Video_Viewing_Dataset_in_head_mounted_virtual_reality/360dataset/intermediateResults/sal.png"
+                    # path = "H:/Uni_Studies/Useful_Datasets_360/Dataset_3_360_Video_Viewing_Dataset_in_head_mounted_virtual_reality/360dataset/intermediateResults/sal.png"
                     # cv2.imshow('',colorFrame)
 
                     # plt.figure(count + 1)
@@ -191,7 +191,7 @@ class ReadData:
                 #     end_y = int(frame.shape[0])
                 #     cv2.line(img, (start_x, start_y), (end_x, end_y), (255, 255, 255), cv2.LINE_AA, 0)
 
-                # path = "E:/Uni_Studies/Useful_Datasets_360\Dataset_3_360_Video_Viewing_Dataset_in_head_mounted_virtual_reality/360dataset/intermediateResults/ori.png"
+                # path = "H:/Uni_Studies/Useful_Datasets_360\Dataset_3_360_Video_Viewing_Dataset_in_head_mounted_virtual_reality/360dataset/intermediateResults/ori.png"
                 # cv2.imwrite(path, img)
 
                 self.frameListOrg.append(frame)
@@ -233,7 +233,7 @@ class ReadData:
             else:
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            # path = "E:/Uni_Studies/Useful_Datasets_360/Dataset_3_360_Video_Viewing_Dataset_in_head_mounted_virtual_reality/360dataset/intermediateResults/sal.png"
+            # path = "H:/Uni_Studies/Useful_Datasets_360/Dataset_3_360_Video_Viewing_Dataset_in_head_mounted_virtual_reality/360dataset/intermediateResults/sal.png"
             # cv2.imshow('',colorFrame)
 
             # plt.figure(count + 1)
@@ -279,14 +279,15 @@ class ReadData:
                     # if this is a slaliency image we convert it to gray scale image
                     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+                    #This function is to change the contrast and birghtness of the image
                     if settings.ENA_BIRGHT_CONTRAST_TRANSFORM:
-                        alpha = 0.2
-                        beta = 60
+                        alpha = 2.2
+                        beta = -60
                         self.imageProcFunctions_obj.brightnessContrastAdjust(image=img,
                                                                              alpha=alpha,
                                                                              beta=beta,
                                                                              videoType = settings.SALIENCY_VIDEO)
-                        # Do the intesity conversion for the image
+
 
                 # get image size and width
                 if i == 0:

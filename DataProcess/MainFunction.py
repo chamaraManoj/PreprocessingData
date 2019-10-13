@@ -5,6 +5,8 @@ from DataProcess import readFoVData as rdFoVData
 from DataProcess import getFileSizes as gtFileVSize
 from DataProcess import saliencyProcessing as saliencyProcFunc
 from DataProcess import processNormalSalMaps as procNorSalMaps
+from DataProcess import imgProcFunctinos as imgProcFunc
+from DataProcess import settings
 from DataProcess import BaseLineModel as baselineMod
 import numpy as np
 import os
@@ -91,7 +93,12 @@ allFoVTraces = []
 #Creating class objects need for different functions
 
 #object needs for reading and processing saliency map contained in videos and separate images as well.
-saliencyFunctinos = saliencyProcFunc.ImageProcessingFunc()
+saliencyFunctinos_obj = saliencyProcFunc.ImageProcessingFunc()
+imageProcFuncitons_obj = imgProcFunc.displayFuncitons()
+
+#Temporarly used function for storing the data.
+# imageProcFuncitons_obj.brightnessContrastAdjust(None, None,None,settings.SALIENCY_VIDEO,videoSaliencyNameList)
+
 
 
 
@@ -136,8 +143,8 @@ if isReadDataFunctions:
         frameListOri = readFrame.frameListOrg
         frameListPanoSal = readFrame.frameListPanoSal
         frameNumList = readFrame.randomFrames
-        saliencyFunctinos.getSalientRegion(frameListPanoSal, frameListOri, frameNumList, videoNormListForSaliencyAnalysis,
-                                       i)
+        saliencyFunctinos_obj.getSalientRegion(frameListPanoSal, frameListOri, frameNumList, videoNormListForSaliencyAnalysis,
+                                               i)
 
     # read the data related to the frames
     # widthOfFrame = readFrame.
@@ -214,7 +221,7 @@ if isReadDataFunctions:
 # read the FoV data and process the tiles  for each frame
 if isReadFoVData:
     fovReader = rdFoVData.ReadFoVData()
-    for i in range(len(fovUserList)):  # len(fovUserList)
+    for i in range(1):  # len(fovUserList)
         allFoVTraces.append(fovReader.readExcelFiles(fovUserList[i]))
 # =====================================================================================================================
 
@@ -235,8 +242,8 @@ if isReadFoVData:
 # @normSalList = List containing the file names which includes the normalized saliency map data
 
 if isSaliencyProcessing:
-    for i in range(len(allFoVTraces)):  # len(allFoVTraces)
-          saliencyFunctinos.getNormalizedSaliencyForTile(allFoVTraces[i], videoSaliencyNameList[i], SALIENCY_VIDEO, 'Panosal')  #[SaliencyInOriginalDataSet or Panosal]
+    for i in range(1):  # len(allFoVTraces)
+        saliencyFunctinos_obj.getNormalizedSaliencyForTile(allFoVTraces[i], videoSaliencyNameList[i], SALIENCY_VIDEO, settings.SALIENCY_FROM_PANOSAL)  #[SaliencyInOriginalDataSet or Panosal]
     processSalData = procNorSalMaps.ProcNorSalMaps(normSalList)
 
 # read the normalized saliency map data
