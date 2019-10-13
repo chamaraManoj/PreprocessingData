@@ -14,6 +14,8 @@ class ProcNorSalMaps:
 
         return
 
+    # This function returns the saliency score from the files for each vidoe.
+    #@
     def readData(self):
         filePath = "E:/Dataset/SaliencyScore"
 

@@ -3,7 +3,7 @@ from DataProcess import readData as rdData
 from DataProcess import processData as procData
 from DataProcess import readFoVData as rdFoVData
 from DataProcess import getFileSizes as gtFileVSize
-from DataProcess import saliencyProcessing as difImageProceFunc
+from DataProcess import saliencyProcessing as saliencyProcFunc
 from DataProcess import processNormalSalMaps as procNorSalMaps
 from DataProcess import BaseLineModel as baselineMod
 import numpy as np
@@ -13,10 +13,10 @@ import os
 # main implemenataion starts==========================================================================================
 
 
-# diving_saliency_n add again
+
 # Names of the original saliency map videos
-videoSalList = ['coaster_saliency_n', 'pacman_saliency_n', 'drive_saliency_n', 'game_saliency_n',
-                'landscape_saliency_n', 'panel_saliency_n', 'ride_saliency_n', 'sport_saliency_n']
+videoSaliencyNameList = ['coaster_saliency_n', 'pacman_saliency_n', 'diving_saliency_n','drive_saliency_n', 'game_saliency_n',
+                'landscape_saliency_n', 'panel_saliency_n', 'ride_saliency_n', 'sport_saliency_n'] # diving_saliency_n add again, removed for PanosalMap
 
 # Names of the original videos
 videoNormList = ['ChariotRace', 'DrivingWith', 'HogRider', 'KangarooIsland', 'MegaCoster', 'PacMan', 'PerlisPanel',
@@ -24,13 +24,13 @@ videoNormList = ['ChariotRace', 'DrivingWith', 'HogRider', 'KangarooIsland', 'Me
 
 # 'MegaCoster'  #SharkShipWreck add again
 # Defined the names list for reading original videos which is exactly matching the saliency map video details
-videoNormListForSaliencyAnalysis = ['RollerCoster', 'PacMan', 'SharkShipWreck','DrivingWith', 'HogRider',
+videoNormListForSaliencyAnalysis = ['RollerCoster', 'PacMan', 'SharkShipWreck', 'DrivingWith', 'HogRider',
                                     'KangarooIsland',
                                     'PerlisPanel', 'ChariotRace', 'SFRSport']
 
 # file names containing the FoV traces of the users
-fovUserList = ["coaster_user", "pacman_user", "diving_user", "drive_user", "game_user",
-               "landscape_user", "panel_user", "ride_user", "sport_user"]
+fovUserList = ["coaster_user", "pacman_user","diving_user", "drive_user", "game_user",
+               "landscape_user", "panel_user", "ride_user", "sport_user"] #"diving_user" is removed fro, 2 index since at the moment proecessing saliency score for panosal map, saliency of that video was no there.
 
 # Names of the list containing the
 normSalList = ["coaster_saliency_n_SalScore", "diving_saliency_n_SalScore", "diving_saliency_n_SalScore",
@@ -83,27 +83,40 @@ isEncodeFunctions = False
 isReadDataFunctions = False
 isProcessDataFunctions = False
 isReadFoVData = True
+isSaliencyProcessing = True
 
 # functions to store common data
 allFoVTraces = []
 
+#Creating class objects need for different functions
+
+#object needs for reading and processing saliency map contained in videos and separate images as well.
+saliencyFunctinos = saliencyProcFunc.ImageProcessingFunc()
+
+
+
 # ====================================================================================================================
 # slice the corresponding video to 1s equal size video segments
 if isEncodeFunctions:
-    encodeFunctions = encData.EncodeData(videoSalList, videoNormList, 1, 30, NUM_OF_ROW, NUM_OF_COL)
-    encodeFunctions.splitVideoSaliency(3)
-    for i in range(len(videoNormList)):
-        encodeFunctions.splitToTiles(i, 3840, 2160, True, resolution)
+    encodeFunctions = encData.EncodeData(videoSaliencyNameList, videoNormList, 1, 30, NUM_OF_ROW, NUM_OF_COL)
+    # encodeFunctions.splitVideoSaliency(3)
+    # for i in range(len(videoNormList)):
+    #     encodeFunctions.splitToTiles(i, 3840, 2160, True, resolution)
+    #encodeFunctions.h265Toh264()
+    encodeFunctions.changeFrameRate(r"E:\Dataset\FinalProcessedVideo\ProcessedVideo_algo_1_Q2\DrivingWith",
+                                    r"E:\Dataset\FinalProcessedVideo\ProcessedVideo_algo_1_Q2\DrivingWith_recent",
+                                    32)
+    print(1)
 # ====end of prepocessing data=========================================================================================
 
 
 # ====================================================================================================================
 # Start reading the frame
+# This set of function to read the image frames from desired saliency map and draw on top of the original image frames.
 if isReadDataFunctions:
-    readFrame = rdData.ReadData(videoSalList, videoNormListForSaliencyAnalysis, isAll)
-    imProceeFuncs = difImageProceFunc.ImageProcessingFunc()
+    readFrame = rdData.ReadData(videoSaliencyNameList, videoNormListForSaliencyAnalysis, isAll)
     # Draw saliency region on top of the video frame
-    for i in range(len(videoSalList)):
+    for i in range(len(videoSaliencyNameList)):
         print("frame")
         print(i)
         if i == 1:
@@ -123,7 +136,7 @@ if isReadDataFunctions:
         frameListOri = readFrame.frameListOrg
         frameListPanoSal = readFrame.frameListPanoSal
         frameNumList = readFrame.randomFrames
-        imProceeFuncs.getSalientRegion(frameListPanoSal, frameListOri, frameNumList, videoNormListForSaliencyAnalysis,
+        saliencyFunctinos.getSalientRegion(frameListPanoSal, frameListOri, frameNumList, videoNormListForSaliencyAnalysis,
                                        i)
 
     # read the data related to the frames
@@ -135,14 +148,14 @@ if isReadDataFunctions:
 # ======End of reading frame data=====================================================================================
 
 
-# ====================================================================================================================
-# processing the data using a naive algorithm. More details are in the class
-# implementation
+# =============Image thresholding======================================================================================
+# This class for threshoding images, particularly for saliency area detection
+#implementation
 # if isProcessDataFunctions:
 # qualityList = []
 #
 #
-# -chamar- This class contains function to threshold the images. This function should be modified
+#-chamar- This class contains function to threshold the images. This function should be modified
 # processFrames = procData.ProcessData(frameList, tileTuple, widthOfFrame, hieghtOfFrame, encRateTuple, qualityList,
 #                                      NUM_OF_ROW, NUM_OF_COL)
 # processFrames.thresholdImage();
@@ -157,8 +170,9 @@ if isReadDataFunctions:
 #
 # except:
 #     print("file not opened")
+# ======================================================================================================================
 
-# ======End of processing data=========================================================================================
+
 
 
 # ======================================================================================================================
@@ -193,26 +207,37 @@ if isReadDataFunctions:
 # encodeFunctions.storeData(1, bitRateList, ALGORITHM_1, encoderResList, i)
 # f.close()
 
+
+
+
+# =============Reading FoV data ======================================================================================
 # read the FoV data and process the tiles  for each frame
-############################
 if isReadFoVData:
     fovReader = rdFoVData.ReadFoVData()
     for i in range(len(fovUserList)):  # len(fovUserList)
         allFoVTraces.append(fovReader.readExcelFiles(fovUserList[i]))
+# =====================================================================================================================
 
-# for i in range(len(allFoVTraces)):  # len(allFoVTraces)
-#      imProceeFuncs.getNormalizedSaliencyForTile(allFoVTraces[i], videoSalList[i], SALIENCY_VIDEO)
-##############################
 
-########################################################################################################################
+
+
+# =============Function anlyzes the FoV traces of the videos===========================================================
 # Function to create baseline benchmark algorithms based on the FoV
-baseLineObj = baselineMod.BaseLineModel(allFoVTraces, videoNormListForSaliencyAnalysis)
-baseLineObj.processBaseLine()
+# baseLineObj = baselineMod.BaseLineModel(allFoVTraces, videoNormListForSaliencyAnalysis)
+# baseLineObj.processBaseLine()
+# =====================================================================================================================
 
+
+
+#===================Read Normalized saliency data======================================================================
 # Read the normalized saliency data from the file and process them to find the percentage saliecny in the FoV and OoV
 # regions
 # @normSalList = List containing the file names which includes the normalized saliency map data
-processSalData = procNorSalMaps.ProcNorSalMaps(normSalList)
+
+if isSaliencyProcessing:
+    for i in range(len(allFoVTraces)):  # len(allFoVTraces)
+          saliencyFunctinos.getNormalizedSaliencyForTile(allFoVTraces[i], videoSaliencyNameList[i], SALIENCY_VIDEO, 'Panosal')  #[SaliencyInOriginalDataSet or Panosal]
+    processSalData = procNorSalMaps.ProcNorSalMaps(normSalList)
 
 # read the normalized saliency map data
 processSalData.readData()
@@ -221,14 +246,16 @@ isRelative = False
 processSalData.getPercentageSaliencyOnTiles(isRelative)
 # isRelative = True
 # processSalData.getPercentageSaliencyOnTiles(isRelative)
-# =====End of reading FoV traces and get average value for whole the video using all the users=========================
+# =====================================================================================================================
+
+
+
 
 # =====================================================================================================================
 # This set of codes read the file sizes of the video using the avarage FoV traces of the users. We assume that data
 # transmission and the client end process do not have any issues in processing. In the mean time we try to read the
 # file sizes related to Rubiks as well
 
-#####################
 # aveAllUserFoVTraceNpArray = fovReader.processTheTrace()
 # fileSizeReader = gtFileVSize.GetFileSizes(aveAllUserFoVTraceNpArray, NUM_OF_ROW, NUM_OF_COL)
 
@@ -236,6 +263,6 @@ processSalData.getPercentageSaliencyOnTiles(isRelative)
 #     if i == 1:
 #         fileSizeReader.readFileSizeOurImp(qualityTuple[i], videoIdNor, videoNormList, ALGORITHM_1)
 # fileSizeReader.readRubiksFileSize(videoIdNor, videoNormList)
-#####################
+
 # ====================================================================================================================
 # ==== main implementation ends=======================================================================================

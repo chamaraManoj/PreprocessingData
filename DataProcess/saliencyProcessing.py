@@ -4,7 +4,8 @@ import numpy as np
 import csv
 from DataProcess import readData as rdData
 from DataProcess import readFoVData as rdFoVData
-
+from DataProcess import BaseLineModel as baselineMod
+from DataProcess import settings
 
 class ImageProcessingFunc:
     frameSkipCount = 15
@@ -12,9 +13,16 @@ class ImageProcessingFunc:
     numOfCol = 20
 
     def __init__(self):
+        self.readVideoDataObj = rdData.ReadData(None, None, None)
+        self.baseLineModelObj = baselineMod.BaseLineModel(None, None)
         return
 
     # function to extract the salient region in the funciton and print saliency map on top of the original frame
+    # @frameListSal: Desired saliecny frames to be drawn on top of the original frames
+    # @frameListOri: Desired original framed to be drawn on top of the saliency frames
+    # @fremaNumList: Desired number list for the frames to be read. previous 2 parameters contains frames related to these indices
+    # @videoNormList : list of the names of videos
+    # @ videoIdSal: Index of currently processing video
 
     def getSalientRegion(self, frameListSal, frameListOri, frameNumList, videoNormList, videoIdSal):
         print(type(frameListSal[0]))
@@ -53,8 +61,9 @@ class ImageProcessingFunc:
     # @foVOneVideo : FoV traces for one video, 50 users for each video. 1800 frames for one user
     # @videoName : video name according to  the saliency video list
     # @videoType : whther it is Saliency Video or original RGB video
-
-    def getNormalizedSaliencyForTile(self, fovOneVideo, videoName, videoType):
+    # @isFrameAveraging: If we get 1800 frames for the saliency map, then we have to do frame averaging. If have frames
+    # @with 500 ms interval time we do not average frames in this funcitons
+    def getNormalizedSaliencyForTile(self, fovOneVideo, videoName, videoType, isFrameAveraging):
 
         # This list contains fov and normalized saliency score in a given tile. There 200 tiles in one frame
         totNormalizedSaliency = []
@@ -66,12 +75,30 @@ class ImageProcessingFunc:
         # value of that pixel should be 255. Thereforemm divide the calculated sum of pixel value by 255 * total num of
         # pixels in the tile.
 
-        #for loop to get the average saliecny map from the corresponding video.
-        for frameSetIndex in range(0, 1800, self.frameSkipCount):  # 0, 1800, 15
-            print(frameSetIndex)
-            salMap = self.getAverageSaliency500ms(frameSetIndex, videoName, videoType)
-            totNormalizedSaliency.append(self.getNormalizedSaliency500ms(salMap))
+        # for loop to get the average saliecny map from the corresponding video. This is done only for the saliency map
+        # given in the original data set because it contains video files for the salieny map
+        if isFrameAveraging == 'SaliencyInOriginalDataSet':
+            for frameSetIndex in range(0, 1800, self.frameSkipCount):  # 0, 1800, 15
+                print(frameSetIndex)
+                salMap = self.getAverageSaliency500ms(frameSetIndex, videoName, videoType)
+                totNormalizedSaliency.append(self.getNormalizedSaliency500ms(salMap))
 
+        # For the PanoSal saliency map at the moment we are reading only the frames in every 15 interval.
+        elif isFrameAveraging == 'Panosal':
+
+            filePath = r"E:\Dataset\PanoSalMaps" + "\\" + videoName
+            imageIndexList = list(range(0, 1800, 15))
+
+            # saliency frmes for a given video. returned list [frame_lists, frame_dimensions]
+            saliencyFrameData = self.readVideoDataObj.readImageFrames(imgIndexList=imageIndexList,
+                                                                      filePath=filePath,
+                                                                      videoType=settings.SALIENCY_VIDEO)
+
+            #compute the normalised saliency values for all the saliency frames taken from the saliencyframeData objects
+            for salFrames in saliencyFrameData[0]:
+                totNormalizedSaliency.append(self.getNormalizedSaliency500ms(salFrames))
+
+        print(1)
         oneVideoSaliencyScore = []
         tUserFOVData = []
         oneUserSaliencyScore = []
@@ -89,10 +116,11 @@ class ImageProcessingFunc:
                 # print("     subFrames  " + str(frameNum))
 
                 # get the total number of tiles in 500 ms sample period
-                for subframe in range(self.frameSkipCount):
-                    for singletile in user[2][frameNum + subframe]:
-                        if not singletile in tilesInSampledFrames:
-                            tilesInSampledFrames.append(singletile)
+                # for subframe in range(self.frameSkipCount):
+                #     for singletile in user[2][frameNum + subframe]:
+                #         if not singletile in tilesInSampledFrames:
+                #             tilesInSampledFrames.append(singletile)
+                tilesInSampledFrames = self.baseLineModelObj.totFoVTiles500Ms(frameNum, user[2])
 
                 tilesInSampledFrames.sort()
                 # total FoV in every 15 frames
@@ -124,9 +152,7 @@ class ImageProcessingFunc:
     # @videoTye: Whether the video is Saliency of Orignal RGB video
     def getAverageSaliency500ms(self, initFrameNum, videoName, videoType):
 
-        readVideoData = rdData.ReadData(None, None, None)
-
-        saliencyVideoFrames = readVideoData.readAnyVideoSegment(initFrameNum, videoName, videoType)
+        saliencyVideoFrames = self.readVideoDataObj.readAnyVideoSegment(initFrameNum, videoName, videoType)
 
         averageSaliencyMap = np.mean(saliencyVideoFrames, axis=0)
 
@@ -172,6 +198,8 @@ class ImageProcessingFunc:
     #
     # return normalizedSaliency
 
+    # This function is to get the normalized saliency map from each of the tile
+    # @evarageSalMap500ms : list of average saliency image frames to be taken for getting normalized saliency map
     def getNormalizedSaliency500ms(self, averageSalMap500ms):
 
         normalizedSaliency = []

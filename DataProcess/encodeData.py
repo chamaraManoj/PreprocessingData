@@ -76,11 +76,11 @@ class EncodeData:
 
         # this function split a given video into 4 x 5 tiles
         if is4K:
-            tempInFilePath = self.inputPathNormal + "\\" + self.videoNormList[videoID] + "4K"+".mp4"
-            tempOutFilePath = self.outputPathNormal + "\\" + self.videoNormList[videoID]+"4K"
+            tempInFilePath = self.inputPathNormal + "\\" + self.videoNormList[videoID] + "4K" + ".mp4"
+            tempOutFilePath = self.outputPathNormal + "\\" + self.videoNormList[videoID] + "4K"
         else:
             tempInFilePath = self.inputPathNormal + "\\" + self.videoNormList[videoID] + ".mp4"
-            tempOutFilePath = self.outputPathNormal + "\\" + self.videoNormList[videoID]+"HD"
+            tempOutFilePath = self.outputPathNormal + "\\" + self.videoNormList[videoID] + "HD"
 
         # create the main directory to store the normal video data tiles
         if not os.path.exists(tempOutFilePath):
@@ -160,7 +160,64 @@ class EncodeData:
                         print(commandUse)
                         os.system(commandUse)
 
-                        # =============================================================================
+    def h265Toh264(self):
+
+        mainPath = r"E:\Dataset\FinalProcessedVideo\Rubiks\DrivingWith"
+
+        inputPath = mainPath + "\\" + "h265"
+        outputPath = mainPath + "\\" + "h264"
+
+        for row in range(4):
+            for col in range(5):
+                frameInPath = inputPath + "\\" + "frame_" + str(row) + "_" + str(col)
+                frameOutPath = outputPath + "\\" + "frame_" + str(row) + "_" + str(col)
+                if not os.path.exists(frameOutPath):
+                    os.makedirs(frameOutPath)
+
+                for chunk in range(59):
+                    chunk = '{:03d}'.format(chunk)
+                    inputVideoChunkPath = frameInPath + "\\" + "frame_" + chunk + "_"
+                    outputVideoChunkPath = frameOutPath + "\\" + "frame_" + chunk + "_"
+                    for layer in range(4):
+                        inputVideoChunkLayerPath = inputVideoChunkPath + str(layer) + ".mp4"
+                        outputVideoChunkLayerPath = outputVideoChunkPath + str(layer) + ".mp4"
+
+                        commandUse = self.Executable + " " + \
+                                     "-i " + inputVideoChunkLayerPath + " " + \
+                                     "-codec:v " + "libx264" + " " + \
+                                     outputVideoChunkLayerPath
+
+                        print(commandUse)
+                        os.system(commandUse)
+        return
+
+    def changeFrameRate(self, inputFilePath, outputFilePath, newRate):
+        for row in range(4):
+            for col in range(5):
+                frameInPath = inputFilePath + "\\" + "frame_" + str(row) + "_" + str(col)
+                frameOutPath = outputFilePath + "\\" + "frame_" + str(row) + "_" + str(col)
+                if not os.path.exists(frameOutPath):
+                    os.makedirs(frameOutPath)
+
+                for chunk in range(59):
+                    chunk = '{:03d}'.format(chunk)
+                    inputVideoChunkPath = frameInPath + "\\" + "frame_" + chunk + ".mp4"
+                    outputVideoChunkPath = frameOutPath + "\\" + "frame_" + chunk + ".mp4"
+                    # for layer in range(4):
+                    #     inputVideoChunkLayerPath = inputVideoChunkPath + str(layer) + ".mp4"
+                    #     outputVideoChunkLayerPath = outputVideoChunkPath + str(layer) + ".mp4"
+
+                    commandUse = self.Executable + " " + \
+                                 "-i " + inputVideoChunkPath + " " + \
+                                 "-filter:v fps=fps="+str(32) + " " + \
+                                 outputVideoChunkPath
+
+                    print(commandUse)
+                    os.system(commandUse)
+
+        return
+
+        # =============================================================================
 #   ffmpeg -hide_banner  -err_detect ignore_err -i input.mp4 -r 24 -codec:v libx264  -vsync 1-codec:a aac -ac 2  -ar 48k  -f segment   -preset fast  -segment_format mpegts  -segment_time 0.5 -force_key_frames  "expr: gte(t, n_forced * 0.5)" out%d.mkv
 #
 #

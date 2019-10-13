@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import copy
 import os
 import random
+from DataProcess import settings
+from DataProcess import imgProcFunctinos
 import csv
 
 
@@ -24,11 +26,11 @@ class ReadData:
     frameListSal = []
     frameListOrg = []
     randomFrames = []
-    frameListPanoSal = []  # contain the saliency maps from new Panosalnet images
+    # frameListPanoSal = []  # contain the saliency maps from new Panosalnet images
 
     # list containing the size of the image
     initialSalImgSize = []
-    panoSalNetSalImgSize = []
+    # panoSalNetSalImgSize = []
     rgbImgSize = []
 
     # Const
@@ -43,6 +45,7 @@ class ReadData:
         self.videoSalList = videoSalList
         self.isAll = isAll
         self.videoNormList = videoNormList
+        self.imageProcFunctions_obj = imgProcFunctinos.displayFuncitons()
 
     # this function generate random number list between 1 -1800 to refer the saliency and corresponding images
     # @fps : frames per second for the video, this is 30
@@ -259,21 +262,39 @@ class ReadData:
     # This functino reads set of video frames for given indices from a given normal file containing PNG images
     # @imgIndexList = list containing the images indices to be read
     # @filePath = path for the video file
+    # @videoType = Type of the video, whether it is saliency image or normal RGB image
     # additional : This function was originally created to read the saliency outputs from  PanoSalNet model
-    def readImageFrames(self, imgIndexList, filePath):
+    def readImageFrames(self, imgIndexList, filePath, videoType):
         onlyfiles = next(os.walk(filePath))[2]
+        frameListPanoSal = []
+        panoSalNetSalImgSize = []
         for i in range(len(imgIndexList)):
+            # we multiply each image index in the list bu 15 to get the original index in the image sequence. This only for
+            # for PanoSal images for the momemnt
             if imgIndexList[i] < len(onlyfiles) * 15:
                 tempImagePath = filePath + "/frame" + str(int(imgIndexList[i])) + '.png'
                 img = cv2.imread(tempImagePath)
 
+                if videoType == settings.SALIENCY_VIDEO:
+                    # if this is a slaliency image we convert it to gray scale image
+                    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+                    if settings.ENA_BIRGHT_CONTRAST_TRANSFORM:
+                        alpha = 0.2
+                        beta = 60
+                        self.imageProcFunctions_obj.brightnessContrastAdjust(image=img,
+                                                                             alpha=alpha,
+                                                                             beta=beta,
+                                                                             videoType = settings.SALIENCY_VIDEO)
+                        # Do the intesity conversion for the image
+
                 # get image size and width
                 if i == 0:
-                    self.panoSalNetSalImgSize.append(img.shape[1])  # width
-                    self.panoSalNetSalImgSize.append(img.shape[0])  # height
-                self.frameListPanoSal.append(img)
+                    panoSalNetSalImgSize.append(img.shape[1])  # width
+                    panoSalNetSalImgSize.append(img.shape[0])  # height
+                frameListPanoSal.append(img)
 
-        return
+        return [frameListPanoSal, panoSalNetSalImgSize]
 
     # This function returns a list containing the meta data of the images read
     # @return : our initial saliency vide frames [width,height]
